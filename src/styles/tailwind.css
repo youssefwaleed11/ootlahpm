@@ -1,0 +1,90 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+@layer base {
+  :root {
+    --background: 248 250 252;
+    --foreground: 15 23 42;
+    --card: 255 255 255;
+    --card-foreground: 15 23 42;
+    --border: 226 232 240;
+    --input: 226 232 240;
+    --primary: 249 115 22;
+    --primary-foreground: 255 255 255;
+    --secondary: 13 148 136;
+    --muted: 241 245 249;
+    --muted-foreground: 100 116 139;
+    --accent: 13 148 136;
+    --destructive: 239 68 68;
+    --ring: 249 115 22;
+    --radius: 0.5rem;
+    --sidebar-bg: 15 23 42;
+    --sidebar-text: 203 213 225;
+    --sidebar-active: 249 115 22;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-slate-200;
+  }
+  body {
+    @apply bg-slate-50 text-slate-900;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+  }
+}
+
+@layer utilities {
+  .font-tabular {
+    font-variant-numeric: tabular-nums;
+  }
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e1 transparent;
+  }
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: #cbd5e1;
+    border-radius: 2px;
+  }
+  .kanban-column {
+    min-height: 500px;
+  }
+  .task-card-enter {
+    animation: taskCardEnter 0.2s ease-out;
+  }
+  @keyframes taskCardEnter {
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .slide-in-right {
+    animation: slideInRight 0.25s ease-out;
+  }
+  @keyframes slideInRight {
+    from { opacity: 0; transform: translateX(24px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+  .fade-in {
+    animation: fadeIn 0.2s ease-out;
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  .pulse-highlight {
+    animation: pulseHighlight 0.6s ease-out;
+  }
+  @keyframes pulseHighlight {
+    0% { background-color: rgba(249, 115, 22, 0.15); }
+    100% { background-color: transparent; }
+  }
+}
