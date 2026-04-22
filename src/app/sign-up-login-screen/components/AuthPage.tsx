@@ -70,30 +70,26 @@ export default function AuthPage() {
 
         <div className="relative z-10 flex flex-col items-center text-center max-w-md px-8">
           <div className="flex items-center gap-3 mb-10">
-            <AppLogo size={48} />
-            <span className="text-white text-3xl font-800 tracking-tight">OotlahPM</span>
+            <img src="/logo.png" alt="Ootlah" className="w-12 h-12 rounded" />
           </div>
 
-          <div className="w-full rounded-2xl overflow-hidden shadow-2xl mb-8 border border-white/10">
+          <h1 className="text-3xl font-800 text-white mb-2 leading-tight">
+            Ootlah Project Management System 2026
+          </h1>
+
+          <div className="w-full rounded-2xl overflow-hidden shadow-2xl my-8 border border-white/10">
             <AppImage
               src="/assets/images/imgi_1_default-1776780049095.png"
-              alt="OotlahPM dashboard preview showing Kanban board with task cards and team management"
+              alt="Ootlah Project Management System dashboard showing task management"
               width={560}
               height={320}
               className="w-full object-cover"
             />
           </div>
 
-          <h1 className="text-2xl font-700 text-white mb-3 leading-tight">
-            Manage projects the way your team actually works
-          </h1>
-          <p className="text-slate-400 text-sm leading-relaxed mb-8">
-            Kanban boards, team chat, role-based access, and real-time notifications — all in one place built for modern teams.
-          </p>
-
           {/* Feature pills */}
           <div className="flex flex-wrap justify-center gap-2">
-            {['Kanban Boards', 'Team Chat', 'Task Assignments', 'Real-time Updates', 'Role-based Access'].map(f => (
+            {['Projects', 'Tasks', 'Team Chat', 'Portfolios', 'Analytics'].map(f => (
               <span key={`feat-${f}`} className="text-xs px-3 py-1.5 rounded-full border border-white/20 text-slate-300 bg-white/5">
                 {f}
               </span>
@@ -106,8 +102,8 @@ export default function AuthPage() {
       <div className="flex-1 flex flex-col items-center justify-center px-6 py-10 bg-slate-50">
         {/* Mobile logo */}
         <div className="lg:hidden flex items-center gap-2 mb-8">
-          <AppLogo size={36} />
-          <span className="text-slate-800 text-xl font-700">OotlahPM</span>
+          <img src="/logo.png" alt="Ootlah" className="w-10 h-10 rounded" />
+          <span className="text-slate-800 text-lg font-700">Ootlah PM</span>
         </div>
 
         <div className="w-full max-w-md">
