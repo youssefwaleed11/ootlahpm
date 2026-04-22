@@ -17,6 +17,9 @@ importers:
       '@heroicons/react':
         specifier: ^2.2.0
         version: 2.2.0(react@19.0.3)
+      '@supabase/auth-helpers-nextjs':
+        specifier: ^0.15.0
+        version: 0.15.0(@supabase/supabase-js@2.104.0)
       '@supabase/ssr':
         specifier: ^0.10.2
         version: 0.10.2(@supabase/supabase-js@2.104.0)
@@ -605,6 +608,12 @@ packages:
 
   '@rushstack/eslint-patch@1.16.1':
     resolution: {integrity: sha512-TvZbIpeKqGQQ7X0zSCvPH9riMSFQFSggnfBjFZ1mEoILW+UuXCKwOoPcgjMwiUtRqFZ8jWhPJc4um14vC6I4ag==}
+
+  '@supabase/auth-helpers-nextjs@0.15.0':
+    resolution: {integrity: sha512-VtXz3GGnxluoxks1g3SaCoYr2OZ7PgRukDl+pLWrDfD2dPDaG8hmkp5iBZsU+lmsDYALGNO2dgbymgpAfD8eCQ==}
+    deprecated: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+    peerDependencies:
+      '@supabase/supabase-js': ^2.76.1
 
   '@supabase/auth-js@2.104.0':
     resolution: {integrity: sha512-Vs0ndL+s5an7rOmXtS/nbYnGXL8m+KXlCSrPIcw9bR96ma6qyLYILnE6syuM+rpDnf+Tg4PVNxNB2+oDwoy6mA==}
@@ -3216,6 +3225,11 @@ snapshots:
   '@rtsao/scc@1.1.0': {}
 
   '@rushstack/eslint-patch@1.16.1': {}
+
+  '@supabase/auth-helpers-nextjs@0.15.0(@supabase/supabase-js@2.104.0)':
+    dependencies:
+      '@supabase/supabase-js': 2.104.0
+      cookie: 1.1.1
 
   '@supabase/auth-js@2.104.0':
     dependencies:
