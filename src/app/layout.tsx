@@ -12,7 +12,7 @@ export const metadata: Metadata = {
   title: 'OotlahPM — Team Project Management, Simplified',
   description: 'OotlahPM helps teams manage projects, assign tasks, and collaborate in real-time with Kanban boards, team chat, and role-based access control.',
   icons: {
-    icon: [{ url: '/favicon.ico', type: 'image/x-icon' }],
+    icon: [{ url: '/favicon.png', type: 'image/png' }],
   },
 };
 
