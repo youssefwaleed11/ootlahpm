@@ -1,7 +1,8 @@
 'use client';
-import React from 'react';
+import React, { useState } from 'react';
 import Icon from '@/components/ui/AppIcon';
-import { getUserById, formatDate, isOverdue, type Task } from '@/lib/mockData';
+import { getUserById, formatDate, isOverdue, type Task, CURRENT_USER } from '@/lib/mockData';
+import { isTaskBlocked, getBlockingTasksInfo } from '@/lib/taskDependencies';
 
 interface TaskCardProps {
   task: Task;
@@ -18,22 +19,41 @@ const PRIORITY_CONFIG = {
 };
 
 export default function TaskCard({ task, onClick, isSelected, isDragging }: TaskCardProps) {
+  const [showApprovalButtons, setShowApprovalButtons] = useState(false);
   const assignee = task.assigneeId ? getUserById(task.assigneeId) : null;
   const overdue = isOverdue(task.dueDate) && task.status !== 'done';
   const priority = PRIORITY_CONFIG[task.priority];
+  const isInReview = task.status === 'in_review';
+  const canApprove = isInReview && (CURRENT_USER.role === 'team_leader' || CURRENT_USER.role === 'admin');
+  const blocked = isTaskBlocked(task);
+  const blockingTasks = getBlockingTasksInfo(task);
 
   return (
     <div
       onClick={onClick}
-      className={`bg-white rounded-xl border cursor-pointer transition-all duration-150 group ${
+      onMouseEnter={() => setShowApprovalButtons(true)}
+      onMouseLeave={() => setShowApprovalButtons(false)}
+      className={`bg-white rounded-xl border cursor-pointer transition-all duration-150 group relative ${
         isSelected
           ? 'border-brand-orange shadow-card-hover ring-2 ring-brand-orange/20'
           : isDragging
           ? 'border-brand-orange/40 shadow-card-hover'
+          : isInReview
+          ? 'border-amber-200 shadow-card hover:border-amber-300 hover:shadow-card-hover'
+          : blocked
+          ? 'border-gray-300 shadow-card opacity-60 hover:opacity-70'
           : 'border-slate-200 shadow-card hover:border-brand-orange/30 hover:shadow-card-hover'
       }`}
+      title={blocked ? `Blocked by: ${blockingTasks.map(t => t.title).join(', ')}` : undefined}
     >
-      <div className="p-3">
+      <div className={`p-3 ${blocked ? 'relative' : ''}`}>
+        {/* Lock icon for blocked tasks */}
+        {blocked && (
+          <div className="absolute top-2 right-2 text-gray-400" title={`Blocked by: ${blockingTasks.map(t => t.title).join(', ')}`}>
+            <Icon name="LockClosedIcon" size={16} />
+          </div>
+        )}
+
         {/* Top row: priority + tags */}
         <div className="flex items-center gap-1.5 mb-2.5">
           <span className={`inline-flex items-center gap-1 text-[10px] font-600 px-1.5 py-0.5 rounded-full ${priority.className}`}>
@@ -95,6 +115,54 @@ export default function TaskCard({ task, onClick, isSelected, isDragging }: Task
       {/* Overdue stripe */}
       {overdue && (
         <div className="h-0.5 bg-gradient-to-r from-red-400 to-red-600 rounded-b-xl" />
+      )}
+
+      {/* In Review Badge */}
+      {isInReview && (
+        <div className="absolute top-2 right-2 bg-amber-400 text-white text-[10px] font-bold px-2 py-1 rounded-full">
+          Pending Approval
+        </div>
+      )}
+
+      {/* Approval Buttons (visible on hover for TL/Admin) */}
+      {showApprovalButtons && canApprove && isInReview && (
+        <div className="absolute inset-0 bg-black/40 rounded-xl flex items-center justify-center gap-2 backdrop-blur-sm">
+          <button 
+            onClick={(e) => {
+              e.stopPropagation();
+              // TODO: Implement approve action
+            }}
+            className="px-3 py-1.5 bg-green-500 text-white rounded font-medium text-sm hover:bg-green-600 transition-colors flex items-center gap-1"
+          >
+            <Icon name="CheckIcon" size={14} />
+            Approve
+          </button>
+          <button 
+            onClick={(e) => {
+              e.stopPropagation();
+              // TODO: Implement request changes action
+            }}
+            className="px-3 py-1.5 bg-amber-500 text-white rounded font-medium text-sm hover:bg-amber-600 transition-colors flex items-center gap-1"
+          >
+            <Icon name="ArrowUturnLeftIcon" size={14} />
+            Changes
+          </button>
+        </div>
+      )}
+
+      {/* Changes Requested Badge */}
+      {task.status === 'changes_requested' && (
+        <div className="absolute top-2 right-2 bg-red-500 text-white text-[10px] font-bold px-2 py-1 rounded-full">
+          Changes Requested
+        </div>
+      )}
+
+      {/* Done Checkmark */}
+      {task.status === 'done' && (
+        <div className="absolute top-2 right-2 flex items-center gap-1 bg-green-50 text-green-700 text-[10px] font-bold px-2 py-1 rounded-full">
+          <Icon name="CheckIcon" size={12} />
+          Done
+        </div>
       )}
     </div>
   );

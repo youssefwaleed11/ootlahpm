@@ -41,11 +41,13 @@ export interface Project {
   createdAt: string;
 }
 
+export type TaskStatus = 'backlog' | 'todo' | 'in_progress' | 'in_review' | 'changes_requested' | 'done';
+
 export interface Task {
   id: string;
   title: string;
   description: string;
-  status: 'todo' | 'in_progress' | 'in_review' | 'done';
+  status: TaskStatus;
   priority: 'low' | 'medium' | 'high' | 'critical';
   projectId: string;
   teamId?: string;
@@ -59,6 +61,12 @@ export interface Task {
   order: number;
   createdAt: string;
   updatedAt: string;
+  approvalComment?: string;
+  completedAt?: string;
+  approvedBy?: string;
+  changesRequestedAt?: string;
+  blockedBy?: string[];
+  blocking?: string[];
 }
 
 export interface Comment {
@@ -100,26 +108,29 @@ export const MOCK_USERS: User[] = [
   { id: 'user-006', name: 'Faisal Al-Amri', email: 'faisal@ootlah.com', role: 'agent', avatar: 'FA', teamId: 'team-002', isOnline: true, joinedAt: '2025-03-05' },
   { id: 'user-007', name: 'Rima Barakat', email: 'rima@ootlah.com', role: 'agent', avatar: 'RB', teamId: 'team-002', isOnline: false, joinedAt: '2025-03-12' },
   { id: 'user-008', name: 'Ziad Najjar', email: 'ziad@ootlah.com', role: 'agent', avatar: 'ZN', teamId: 'team-001', isOnline: true, joinedAt: '2025-03-20' },
+  { id: 'user-009', name: 'Amira Hassan', email: 'amira@ootlah.com', role: 'team_leader', avatar: 'AH', teamId: 'team-003', isOnline: true, joinedAt: '2025-03-15' },
+  { id: 'user-010', name: 'Karim Saleh', email: 'karim@ootlah.com', role: 'agent', avatar: 'KS', teamId: 'team-003', isOnline: true, joinedAt: '2025-03-18' },
 ];
 
 export const MOCK_TEAMS: Team[] = [
-  { id: 'team-001', name: 'Product & Design', leaderId: 'user-002', memberIds: ['user-002', 'user-003', 'user-004', 'user-008'], projectIds: ['proj-001', 'proj-003'], color: '#F97316', createdAt: '2025-01-20' },
-  { id: 'team-002', name: 'Engineering', leaderId: 'user-005', memberIds: ['user-005', 'user-006', 'user-007'], projectIds: ['proj-002', 'proj-004'], color: '#0D9488', createdAt: '2025-02-05' },
+  { id: 'team-001', name: 'SEO & Content', leaderId: 'user-002', memberIds: ['user-002', 'user-003', 'user-004', 'user-008'], projectIds: ['proj-001', 'proj-003'], color: '#F97316', createdAt: '2025-01-20' },
+  { id: 'team-002', name: 'Media Buying & PPC', leaderId: 'user-005', memberIds: ['user-005', 'user-006', 'user-007'], projectIds: ['proj-002', 'proj-004'], color: '#0D9488', createdAt: '2025-02-05' },
+  { id: 'team-003', name: 'Social Media & Design', leaderId: 'user-009', memberIds: ['user-009', 'user-010'], projectIds: ['proj-005'], color: '#06B6D4', createdAt: '2025-03-10' },
 ];
 
 export const MOCK_PROJECTS: Project[] = [
-  { id: 'proj-001', name: 'Ootlah Mobile App v2', description: 'Complete redesign of the Ootlah mobile application with new onboarding flow, improved navigation, and dark mode support.', status: 'active', teamId: 'team-001', adminId: 'user-001', startDate: '2026-02-01', dueDate: '2026-05-30', progress: 64, priority: 'high', tags: ['mobile', 'design', 'UX'], taskCount: 24, completedTaskCount: 15, createdAt: '2026-01-28' },
-  { id: 'proj-002', name: 'API Gateway Refactor', description: 'Migrate legacy REST endpoints to GraphQL, improve response times, and implement rate limiting across all services.', status: 'active', teamId: 'team-002', adminId: 'user-001', startDate: '2026-03-01', dueDate: '2026-06-15', progress: 38, priority: 'critical', tags: ['backend', 'API', 'performance'], taskCount: 18, completedTaskCount: 7, createdAt: '2026-02-25' },
-  { id: 'proj-003', name: 'Brand Identity Refresh', description: 'Update brand guidelines, create new asset library, and roll out refreshed identity across all touchpoints.', status: 'active', teamId: 'team-001', adminId: 'user-001', startDate: '2026-03-15', dueDate: '2026-04-30', progress: 82, priority: 'medium', tags: ['branding', 'design'], taskCount: 12, completedTaskCount: 10, createdAt: '2026-03-10' },
-  { id: 'proj-004', name: 'Analytics Dashboard', description: 'Build real-time analytics dashboard for internal teams to monitor KPIs, user engagement, and system health.', status: 'on_hold', teamId: 'team-002', adminId: 'user-001', startDate: '2026-04-01', dueDate: '2026-07-01', progress: 12, priority: 'medium', tags: ['analytics', 'frontend'], taskCount: 20, completedTaskCount: 2, createdAt: '2026-03-28' },
-  { id: 'proj-005', name: 'Q1 Marketing Campaign', description: 'Coordinate all Q1 marketing deliverables including social media assets, email campaigns, and landing pages.', status: 'archived', teamId: 'team-001', adminId: 'user-001', startDate: '2026-01-01', dueDate: '2026-03-31', progress: 100, priority: 'low', tags: ['marketing', 'content'], taskCount: 16, completedTaskCount: 16, createdAt: '2025-12-20' },
+  { id: 'proj-001', name: 'Tech Company SEO Campaign 2026', description: 'Comprehensive SEO strategy for Q1-Q2 including keyword research, content creation, technical optimization, and link building.', status: 'active', teamId: 'team-001', adminId: 'user-001', startDate: '2026-02-01', dueDate: '2026-06-30', progress: 64, priority: 'high', tags: ['SEO', 'content', 'organic'], taskCount: 24, completedTaskCount: 15, createdAt: '2026-01-28' },
+  { id: 'proj-002', name: 'E-Commerce Google Ads Campaign', description: 'Google Shopping and Search ads strategy for new product launch. Target high-intent keywords and optimize for ROAS.', status: 'active', teamId: 'team-002', adminId: 'user-001', startDate: '2026-03-01', dueDate: '2026-06-15', progress: 38, priority: 'critical', tags: ['PPC', 'Google Ads', 'ROI'], taskCount: 18, completedTaskCount: 7, createdAt: '2026-02-25' },
+  { id: 'proj-003', name: 'Client Brand Refresh - Creative Assets', description: 'Design new brand visuals, social media templates, and marketing collateral for rebranding initiative.', status: 'active', teamId: 'team-001', adminId: 'user-001', startDate: '2026-03-15', dueDate: '2026-04-30', progress: 82, priority: 'medium', tags: ['branding', 'design', 'creative'], taskCount: 12, completedTaskCount: 10, createdAt: '2026-03-10' },
+  { id: 'proj-004', name: 'LinkedIn B2B Marketing Campaign', description: 'Paid LinkedIn ads strategy targeting C-suite decision makers with thought leadership and case study content.', status: 'on_hold', teamId: 'team-002', adminId: 'user-001', startDate: '2026-04-01', dueDate: '2026-07-01', progress: 12, priority: 'medium', tags: ['LinkedIn', 'B2B', 'PPC'], taskCount: 20, completedTaskCount: 2, createdAt: '2026-03-28' },
+  { id: 'proj-005', name: 'Q1 Social Media & Influencer Campaign', description: 'Manage all Q1 social media content, influencer partnerships, and community engagement across all platforms.', status: 'active', teamId: 'team-003', adminId: 'user-001', startDate: '2026-01-15', dueDate: '2026-03-31', progress: 75, priority: 'high', tags: ['social', 'content', 'influencer'], taskCount: 28, completedTaskCount: 21, createdAt: '2025-12-20' },
 ];
 
 export const MOCK_TASKS: Task[] = [
   // proj-001 tasks
   { id: 'task-001', title: 'Design new onboarding flow wireframes', description: 'Create low-fidelity wireframes for the 5-step onboarding flow. Cover account setup, team invite, first project creation, and tutorial overlay.', status: 'done', priority: 'high', projectId: 'proj-001', teamId: 'team-001', assigneeId: 'user-003', reporterId: 'user-002', startDate: '2026-02-05', dueDate: '2026-02-20', tags: ['wireframe', 'UX'], attachmentCount: 3, commentCount: 7, order: 0, createdAt: '2026-02-01', updatedAt: '2026-02-18' },
   { id: 'task-002', title: 'Implement dark mode tokens', description: 'Set up design token system for dark mode. Define all color variables and ensure every component respects the theme switch.', status: 'in_review', priority: 'medium', projectId: 'proj-001', teamId: 'team-001', assigneeId: 'user-004', reporterId: 'user-002', startDate: '2026-02-20', dueDate: '2026-03-10', tags: ['tokens', 'design-system'], attachmentCount: 1, commentCount: 4, order: 0, createdAt: '2026-02-18', updatedAt: '2026-03-08' },
-  { id: 'task-003', title: 'Navigation redesign — bottom tab bar', description: 'Redesign the bottom navigation with 5 main tabs. Include icon + label treatment, active states, and notification badges.', status: 'in_progress', priority: 'high', projectId: 'proj-001', teamId: 'team-001', assigneeId: 'user-003', reporterId: 'user-002', startDate: '2026-03-01', dueDate: '2026-03-25', tags: ['navigation', 'mobile'], attachmentCount: 2, commentCount: 3, order: 0, createdAt: '2026-02-28', updatedAt: '2026-03-15' },
+  { id: 'task-003', title: 'Navigation redesign — bottom tab bar', description: 'Redesign the bottom navigation with 5 main tabs. Include icon + label treatment, active states, and notification badges.', status: 'in_progress', priority: 'high', projectId: 'proj-001', teamId: 'team-001', assigneeId: 'user-003', reporterId: 'user-002', startDate: '2026-03-01', dueDate: '2026-03-25', tags: ['navigation', 'mobile'], attachmentCount: 2, commentCount: 3, order: 0, createdAt: '2026-02-28', updatedAt: '2026-03-15', blockedBy: ['task-002'], blocking: [] },
   { id: 'task-004', title: 'Profile screen UI update', description: 'Update the user profile screen with new avatar upload, bio field, and linked accounts section.', status: 'todo', priority: 'low', projectId: 'proj-001', teamId: 'team-001', assigneeId: 'user-008', reporterId: 'user-002', startDate: '2026-03-20', dueDate: '2026-04-10', tags: ['profile', 'UI'], attachmentCount: 0, commentCount: 1, order: 0, createdAt: '2026-03-15', updatedAt: '2026-03-15' },
   { id: 'task-005', title: 'Push notification permission flow', description: 'Design and implement the permission request flow for push notifications. Include rationale screen and fallback for denied state.', status: 'todo', priority: 'medium', projectId: 'proj-001', teamId: 'team-001', assigneeId: 'user-004', reporterId: 'user-002', startDate: '2026-04-01', dueDate: '2026-04-20', tags: ['notifications', 'UX'], attachmentCount: 0, commentCount: 0, order: 1, createdAt: '2026-03-28', updatedAt: '2026-03-28' },
   { id: 'task-006', title: 'App store screenshots', description: 'Create 8 App Store and Play Store screenshots showcasing key features. Include device frames and localized copy.', status: 'in_progress', priority: 'medium', projectId: 'proj-001', teamId: 'team-001', assigneeId: 'user-008', reporterId: 'user-001', startDate: '2026-04-05', dueDate: '2026-04-25', tags: ['marketing', 'assets'], attachmentCount: 5, commentCount: 2, order: 1, createdAt: '2026-04-02', updatedAt: '2026-04-10' },

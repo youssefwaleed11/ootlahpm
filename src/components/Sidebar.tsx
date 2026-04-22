@@ -4,6 +4,7 @@ import Link from 'next/link';
 import AppLogo from '@/components/ui/AppLogo';
 import Icon from '@/components/ui/AppIcon';
 import { CURRENT_USER, MOCK_NOTIFICATIONS } from '@/lib/mockData';
+import { getSectionItems, UserRole } from '@/lib/sidebarConfig';
 
 interface SidebarProps {
   collapsed: boolean;
@@ -14,31 +15,6 @@ interface SidebarProps {
   onChatToggle: () => void;
   chatOpen: boolean;
 }
-
-const NAV_GROUPS = [
-  {
-    label: 'Workspace',
-    items: [
-      { key: 'nav-dashboard', label: 'Dashboard', icon: 'Squares2X2Icon', path: '/kanban-board', badge: null },
-      { key: 'nav-kanban', label: 'Kanban Board', icon: 'ViewColumnsIcon', path: '/kanban-board', badge: null },
-      { key: 'nav-projects', label: 'Projects', icon: 'FolderIcon', path: '/project-management', badge: null },
-    ],
-  },
-  {
-    label: 'Team',
-    items: [
-      { key: 'nav-team', label: 'My Team', icon: 'UserGroupIcon', path: '/project-management', badge: null },
-      { key: 'nav-chat', label: 'Team Chat', icon: 'ChatBubbleLeftRightIcon', path: null, badge: 3 },
-    ],
-  },
-  {
-    label: 'Admin',
-    items: [
-      { key: 'nav-users', label: 'Users & Roles', icon: 'UsersIcon', path: '/project-management', badge: null },
-      { key: 'nav-settings', label: 'Settings', icon: 'Cog6ToothIcon', path: '/project-management', badge: null },
-    ],
-  },
-];
 
 const unreadNotifs = MOCK_NOTIFICATIONS.filter(n => !n.isRead).length;
 
@@ -98,7 +74,7 @@ function SidebarContent({ collapsed, onToggle, currentPath, onChatToggle, chatOp
         {!collapsed && (
           <div className="flex items-center gap-2 min-w-0">
             <AppLogo size={32} />
-            <span className="font-display text-white font-700 text-base tracking-tight truncate">OotlahPM</span>
+            <span className="font-display text-white font-700 text-base tracking-tight truncate">Ootlah</span>
           </div>
         )}
         {collapsed && <AppLogo size={32} />}
@@ -126,7 +102,7 @@ function SidebarContent({ collapsed, onToggle, currentPath, onChatToggle, chatOp
 
       {/* Nav Groups */}
       <nav className="flex-1 overflow-y-auto scrollbar-thin py-3 px-2">
-        {NAV_GROUPS.map((group) => (
+        {getSectionItems(CURRENT_USER.role as UserRole).map((group) => (
           <div key={`group-${group.label}`} className="mb-4">
             {!collapsed && (
               <p className="text-slate-500 text-[10px] font-600 uppercase tracking-widest px-2 mb-1">{group.label}</p>
@@ -134,6 +110,7 @@ function SidebarContent({ collapsed, onToggle, currentPath, onChatToggle, chatOp
             {group.items.map((item) => {
               const isActive = currentPath === item.path;
               const isChat = item.label === 'Team Chat';
+              const displayBadge = typeof item.badge === 'number' ? item.badge : null;
 
               const content = (
                 <div
@@ -150,16 +127,16 @@ function SidebarContent({ collapsed, onToggle, currentPath, onChatToggle, chatOp
                   {!collapsed && (
                     <>
                       <span className="text-sm font-500 flex-1 truncate">{item.label}</span>
-                      {item.badge && (
+                      {displayBadge && (
                         <span className="bg-brand-orange text-white text-[10px] font-700 px-1.5 py-0.5 rounded-full min-w-[18px] text-center">
-                          {item.badge}
+                          {displayBadge}
                         </span>
                       )}
                     </>
                   )}
-                  {collapsed && item.badge && (
+                  {collapsed && displayBadge && (
                     <span className="absolute top-0.5 right-0.5 w-4 h-4 bg-brand-orange rounded-full text-[9px] text-white font-700 flex items-center justify-center">
-                      {item.badge}
+                      {displayBadge}
                     </span>
                   )}
                 </div>

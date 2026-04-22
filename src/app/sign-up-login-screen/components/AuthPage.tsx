@@ -37,7 +37,7 @@ export default function AuthPage() {
       return;
     }
     toast.success(`Welcome back! Signed in as ${valid.role}.`);
-    router.push('/kanban-board');
+    router.push('/dashboard');
   };
 
   const handleSignupSubmit = async (data: SignupForm) => {
@@ -71,33 +71,12 @@ export default function AuthPage() {
         <div className="relative z-10 flex flex-col items-center text-center max-w-md px-8">
           <div className="flex items-center gap-3 mb-10">
             <AppLogo size={48} />
-            <span className="text-white text-3xl font-800 tracking-tight">OotlahPM</span>
+            <span className="text-white text-3xl font-800 tracking-tight">Ootlah</span>
           </div>
 
-          <div className="w-full rounded-2xl overflow-hidden shadow-2xl mb-8 border border-white/10">
-            <AppImage
-              src="/assets/images/imgi_1_default-1776780049095.png"
-              alt="OotlahPM dashboard preview showing Kanban board with task cards and team management"
-              width={560}
-              height={320}
-              className="w-full object-cover"
-            />
-          </div>
-
-          <h1 className="text-2xl font-700 text-white mb-3 leading-tight">
-            Manage projects the way your team actually works
+          <h1 className="text-4xl font-800 text-white mb-3 leading-tight">
+            Ootlah Project Management System 2026
           </h1>
-          <p className="text-slate-400 text-sm leading-relaxed mb-8">
-            Kanban boards, team chat, role-based access, and real-time notifications — all in one place built for modern teams.
-          </p>
-
-          {/* Feature pills */}
-          <div className="flex flex-wrap justify-center gap-2">
-            {['Kanban Boards', 'Team Chat', 'Task Assignments', 'Real-time Updates', 'Role-based Access'].map(f => (
-              <span key={`feat-${f}`} className="text-xs px-3 py-1.5 rounded-full border border-white/20 text-slate-300 bg-white/5">
-                {f}
-              </span>
-            ))}
           </div>
         </div>
       </div>
@@ -107,7 +86,7 @@ export default function AuthPage() {
         {/* Mobile logo */}
         <div className="lg:hidden flex items-center gap-2 mb-8">
           <AppLogo size={36} />
-          <span className="text-slate-800 text-xl font-700">OotlahPM</span>
+          <span className="text-slate-800 text-xl font-700">Ootlah</span>
         </div>
 
         <div className="w-full max-w-md">
@@ -132,7 +111,7 @@ export default function AuthPage() {
           {tab === 'login' && (
             <div className="bg-white rounded-2xl border border-slate-200 shadow-card p-6 fade-in">
               <h2 className="text-lg font-700 text-slate-800 mb-1">Welcome back</h2>
-              <p className="text-sm text-slate-500 mb-5">Sign in to your OotlahPM workspace</p>
+              <p className="text-sm text-slate-500 mb-5">Sign in to your Ootlah workspace</p>
 
               <form onSubmit={loginForm.handleSubmit(handleLoginSubmit)} className="space-y-4">
                 <div>
