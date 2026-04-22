@@ -1,30 +1,27 @@
 'use client';
 import React, { useState } from 'react';
 import AppLayout from '@/components/AppLayout';
-import ProjectStatsRow from './ProjectStatsRow';
-import ProjectFilters from './ProjectFilters';
 import ProjectGrid from './ProjectGrid';
 import CreateProjectModal from './CreateProjectModal';
-import TeamManagementPanel from './TeamManagementPanel';
-import InviteUserModal from './InviteUserModal';
-import { MOCK_PROJECTS, type Project } from '@/lib/mockData';
+import { MOCK_PROJECTS, CURRENT_USER, type Project } from '@/lib/mockData';
+import Icon from '@/components/ui/AppIcon';
 
 export default function ProjectManagementPage() {
   const [projects, setProjects] = useState<Project[]>(MOCK_PROJECTS);
-  const [statusFilter, setStatusFilter] = useState<'all' | Project['status']>('all');
-  const [teamFilter, setTeamFilter] = useState<string>('all');
-  const [searchQuery, setSearchQuery] = useState('');
   const [createModalOpen, setCreateModalOpen] = useState(false);
-  const [teamPanelOpen, setTeamPanelOpen] = useState(false);
-  const [inviteModalOpen, setInviteModalOpen] = useState(false);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
 
-  const filtered = projects.filter(p => {
-    const matchStatus = statusFilter === 'all' || p.status === statusFilter;
-    const matchTeam = teamFilter === 'all' || p.teamId === teamFilter;
-    const matchSearch = !searchQuery || p.name.toLowerCase().includes(searchQuery.toLowerCase()) || p.description.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchStatus && matchTeam && matchSearch;
-  });
+  // Filter: Only show projects where user is assigned or their team is assigned
+  const userTeamId = CURRENT_USER.teamId;
+  const myProjects = projects.filter(p => 
+    p.teamId === userTeamId || 
+    MOCK_PROJECTS.find(proj => proj.id === p.id)?.adminId === CURRENT_USER.id
+  );
+
+  const filtered = myProjects.filter(p => 
+    !searchQuery || p.name.toLowerCase().includes(searchQuery.toLowerCase()) || p.description.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   const handleCreateProject = (project: Project) => {
     // BACKEND INTEGRATION: Supabase insert project + Resend email to team members
@@ -48,24 +45,10 @@ export default function ProjectManagementPage() {
         {/* Page header */}
         <div className="flex items-start justify-between gap-4 flex-wrap">
           <div>
-            <h1 className="text-2xl font-700 text-slate-800 tracking-tight">Projects</h1>
-            <p className="text-sm text-slate-500 mt-0.5">Manage your workspace projects, teams, and progress</p>
+            <h1 className="text-2xl font-700 text-slate-800 tracking-tight">My Projects</h1>
+            <p className="text-sm text-slate-500 mt-0.5">Projects assigned to you and your team</p>
           </div>
-          <div className="flex items-center gap-2 flex-wrap">
-            <button
-              onClick={() => setInviteModalOpen(true)}
-              className="flex items-center gap-1.5 px-3 py-2 border border-slate-200 bg-white text-slate-600 text-sm font-500 rounded-lg hover:bg-slate-50 hover:border-slate-300 transition-all duration-150 active:scale-95"
-            >
-              <Icon name="UserPlusIcon" size={16} />
-              Invite User
-            </button>
-            <button
-              onClick={() => setTeamPanelOpen(true)}
-              className="flex items-center gap-1.5 px-3 py-2 border border-slate-200 bg-white text-slate-600 text-sm font-500 rounded-lg hover:bg-slate-50 hover:border-slate-300 transition-all duration-150 active:scale-95"
-            >
-              <Icon name="UserGroupIcon" size={16} />
-              Manage Teams
-            </button>
+          {CURRENT_USER.role !== 'agent' && (
             <button
               onClick={() => { setEditingProject(null); setCreateModalOpen(true); }}
               className="flex items-center gap-1.5 px-3 py-2 bg-brand-orange hover:bg-brand-orange-dark text-white text-sm font-600 rounded-lg transition-all duration-150 active:scale-95 shadow-sm"
@@ -73,22 +56,22 @@ export default function ProjectManagementPage() {
               <Icon name="PlusIcon" size={16} />
               New Project
             </button>
-          </div>
+          )}
         </div>
 
-        {/* Stats row */}
-        <ProjectStatsRow projects={projects} />
-
-        {/* Filters */}
-        <ProjectFilters
-          statusFilter={statusFilter}
-          onStatusFilter={setStatusFilter}
-          teamFilter={teamFilter}
-          onTeamFilter={setTeamFilter}
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-          totalCount={filtered.length}
-        />
+        {/* Search */}
+        {filtered.length > 0 && (
+          <div className="relative">
+            <Icon name="MagnifyingGlassIcon" size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <input
+              type="text"
+              placeholder="Search projects..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-orange"
+            />
+          </div>
+        )}
 
         {/* Project grid */}
         <ProjectGrid
@@ -99,7 +82,7 @@ export default function ProjectManagementPage() {
         />
       </div>
 
-      {/* Modals & panels */}
+      {/* Create Project Modal */}
       {createModalOpen && (
         <CreateProjectModal
           editingProject={editingProject}
@@ -107,25 +90,6 @@ export default function ProjectManagementPage() {
           onCreate={handleCreateProject}
         />
       )}
-      {teamPanelOpen && (
-        <TeamManagementPanel onClose={() => setTeamPanelOpen(false)} />
-      )}
-      {inviteModalOpen && (
-        <InviteUserModal onClose={() => setInviteModalOpen(false)} />
-      )}
     </AppLayout>
   );
-}
-
-// Local Icon import for this file
-function Icon({ name, size = 16, className = '' }: { name: string; size?: number; className?: string }) {
-  const icons: Record<string, React.ReactNode> = {
-    UserPlusIcon: (
-      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" width={size} height={size} className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M19 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zM4 19.235v-.11a6.375 6.375 0 0112.75 0v.109A12.318 12.318 0 0110.374 21c-2.331 0-4.512-.645-6.374-1.766z" />
-      </svg>
-    ),
-  };
-  // Fall through to AppIcon for unknown icons
-  return icons[name] ? <>{icons[name]}</> : null;
 }

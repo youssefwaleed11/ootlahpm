@@ -15,23 +15,27 @@ export interface SidebarSection {
 }
 
 export const SIDEBAR_CONFIG: SidebarItem[] = [
-  { key: 'dashboard', label: 'Dashboard', icon: 'Squares2X2Icon', path: '/dashboard', roles: ['admin', 'team_leader', 'agent'] },
+  // Main Navigation - Available to All
+  { key: 'dashboard', label: 'Global Dashboard', icon: 'Squares2X2Icon', path: '/dashboard', roles: ['admin', 'team_leader', 'agent'] },
+  { key: 'workflow', label: 'Workflow Board', icon: 'ViewColumnsIcon', path: '/kanban-board', roles: ['admin', 'team_leader', 'agent'] },
   { key: 'my-tasks', label: 'My Tasks', icon: 'ClipboardDocumentCheckIcon', path: '/my-tasks', roles: ['admin', 'team_leader', 'agent'] },
-  { key: 'kanban', label: 'Kanban Board', icon: 'ViewColumnsIcon', path: '/kanban-board', roles: ['admin', 'team_leader', 'agent'] },
-  { key: 'projects', label: 'Projects', icon: 'FolderIcon', path: '/project-management', roles: ['admin', 'team_leader', 'agent'] },
+  { key: 'projects', label: 'My Projects', icon: 'FolderIcon', path: '/project-management', roles: ['admin', 'team_leader', 'agent'] },
+  
+  // Admin & Team Leader Features
   { key: 'portfolios', label: 'Portfolios', icon: 'RectangleStackIcon', path: '/portfolios', roles: ['admin', 'team_leader'] },
-  { key: 'approval-queue', label: 'Approval Queue', icon: 'ClipboardDocumentListIcon', path: '/approval-queue', roles: ['admin', 'team_leader'], badge: 'pendingApprovals' },
-  { key: 'team-chat', label: 'Team Chat', icon: 'ChatBubbleLeftRightIcon', path: null, roles: ['admin', 'team_leader', 'agent'], badge: 3 },
-  { key: 'my-team', label: 'My Team', icon: 'UserGroupIcon', path: '/project-management', roles: ['admin', 'team_leader'] },
+  { key: 'approval-queue', label: 'Approvals', icon: 'ClipboardDocumentListIcon', path: '/approval-queue', roles: ['admin', 'team_leader'], badge: 'pendingApprovals' },
   { key: 'reporting', label: 'Reporting', icon: 'ChartBarIcon', path: '/reporting', roles: ['admin', 'team_leader'] },
-  { key: 'users-roles', label: 'Users & Roles', icon: 'UsersIcon', path: '/project-management', roles: ['admin'] },
+  
+  // Admin Only
+  { key: 'team-management', label: 'Team Management', icon: 'UserGroupIcon', path: '/team-management', roles: ['admin'] },
+  { key: 'users-roles', label: 'Users & Roles', icon: 'UsersIcon', path: '/users-roles', roles: ['admin'] },
   { key: 'settings', label: 'Settings', icon: 'Cog6ToothIcon', path: '/settings', roles: ['admin'] },
 ];
 
 export const SIDEBAR_SECTIONS: Record<UserRole, string[]> = {
-  admin: ['Workspace', 'Team', 'Administration'],
-  team_leader: ['Workspace', 'Team', 'My Work'],
-  agent: ['Workspace', 'My Work'],
+  admin: ['Main', 'Management', 'Administration'],
+  team_leader: ['Main', 'Management'],
+  agent: ['Main'],
 };
 
 export function getVisibleItems(role: UserRole): SidebarItem[] {
@@ -43,21 +47,17 @@ export function getSectionItems(role: UserRole): SidebarSection[] {
   const sections = SIDEBAR_SECTIONS[role];
 
   const sectionMap: Record<string, SidebarItem[]> = {
-    'Workspace': [],
-    'My Work': [],
-    'Team': [],
+    'Main': [],
+    'Management': [],
     'Administration': [],
   };
 
   visibleItems.forEach(item => {
-    if (['dashboard', 'kanban', 'projects'].includes(item.key)) {
-      sectionMap['Workspace'].push(item);
+    if (['dashboard', 'workflow', 'my-tasks', 'projects'].includes(item.key)) {
+      sectionMap['Main'].push(item);
     }
-    if (['my-tasks'].includes(item.key)) {
-      sectionMap['My Work'].push(item);
-    }
-    if (['my-team', 'team-chat', 'approval-queue', 'portfolios', 'reporting'].includes(item.key)) {
-      sectionMap['Team'].push(item);
+    if (['portfolios', 'approval-queue', 'reporting', 'team-management'].includes(item.key)) {
+      sectionMap['Management'].push(item);
     }
     if (['users-roles', 'settings'].includes(item.key)) {
       sectionMap['Administration'].push(item);
