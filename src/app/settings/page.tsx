@@ -14,6 +14,48 @@ export default function SettingsPage() {
     dailyDigest: false,
   });
 
+  // Load theme from localStorage on mount
+  React.useEffect(() => {
+    const savedTheme = localStorage.getItem('theme') as 'light' | 'dark' | 'auto' | null;
+    if (savedTheme) {
+      setTheme(savedTheme);
+      applyTheme(savedTheme);
+    }
+  }, []);
+
+  // Apply theme when it changes
+  const applyTheme = (newTheme: 'light' | 'dark' | 'auto') => {
+    const html = document.documentElement;
+    localStorage.setItem('theme', newTheme);
+    
+    if (newTheme === 'dark') {
+      html.classList.add('dark');
+      document.body.style.backgroundColor = '#0f172a';
+      document.body.style.color = '#f1f5f9';
+    } else if (newTheme === 'light') {
+      html.classList.remove('dark');
+      document.body.style.backgroundColor = '#ffffff';
+      document.body.style.color = '#0f172a';
+    } else {
+      // Auto - detect system preference
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (prefersDark) {
+        html.classList.add('dark');
+        document.body.style.backgroundColor = '#0f172a';
+        document.body.style.color = '#f1f5f9';
+      } else {
+        html.classList.remove('dark');
+        document.body.style.backgroundColor = '#ffffff';
+        document.body.style.color = '#0f172a';
+      }
+    }
+  };
+
+  const handleThemeChange = (newTheme: 'light' | 'dark' | 'auto') => {
+    setTheme(newTheme);
+    applyTheme(newTheme);
+  };
+
   return (
     <AppLayout currentPath="/settings">
       <div className="max-w-2xl space-y-8">
@@ -93,7 +135,7 @@ export default function SettingsPage() {
                     name="theme"
                     value={option.id}
                     checked={theme === option.id}
-                    onChange={(e) => setTheme(e.target.value as any)}
+                    onChange={(e) => handleThemeChange(e.target.value as any)}
                     className="w-4 h-4"
                   />
                   <Icon name={option.icon as any} size={18} className="text-slate-600" />
