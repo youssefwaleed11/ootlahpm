@@ -4,7 +4,9 @@ import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea
 import TaskCard from './TaskCard';
 import Icon from '@/components/ui/AppIcon';
 import type { Task } from '@/lib/mockData';
+import { CURRENT_USER } from '@/lib/mockData';
 import { toast } from 'sonner';
+import { isTaskBlocked } from '@/lib/taskDependencies';
 
 interface KanbanColumnsProps {
   tasks: Task[];
@@ -13,7 +15,8 @@ interface KanbanColumnsProps {
   selectedTaskId?: string;
 }
 
-const COLUMNS: { id: Task['status']; label: string; color: string; dotColor: string }[] = [
+const COLUMNS: { id: Task['status']; label: string; color: string; dotColor: string; visibleRoles?: string[] }[] = [
+  { id: 'backlog', label: 'Backlog', color: 'bg-gray-100 text-gray-600', dotColor: 'bg-gray-400', visibleRoles: ['admin', 'team_leader'] },
   { id: 'todo', label: 'To Do', color: 'bg-slate-100 text-slate-600', dotColor: 'bg-slate-400' },
   { id: 'in_progress', label: 'In Progress', color: 'bg-blue-50 text-blue-700', dotColor: 'bg-blue-500' },
   { id: 'in_review', label: 'In Review', color: 'bg-amber-50 text-amber-700', dotColor: 'bg-amber-500' },
@@ -33,9 +36,29 @@ export default function KanbanColumns({ tasks, onTaskClick, onStatusChange, sele
     if (!destination) return;
     if (destination.droppableId === source.droppableId && destination.index === source.index) return;
 
+    const task = localTasks.find(t => t.id === draggableId);
     const newStatus = destination.droppableId as Task['status'];
+    const sourceStatus = source.droppableId as Task['status'];
+
+    // Role-based drag restrictions
+    if (CURRENT_USER.role === 'agent') {
+      // Agents can only move todo→in_progress or in_progress→in_review
+      const allowedMoves = ['todo', 'in_progress'];
+      if (!allowedMoves.includes(sourceStatus) || (sourceStatus === 'todo' && newStatus !== 'in_progress') || (sourceStatus === 'in_progress' && newStatus !== 'in_review')) {
+        toast.error('Only Team Leaders can approve or move tasks to backlog.');
+        return;
+      }
+    } else if (CURRENT_USER.role === 'team_leader') {
+      // Team leaders can drag within their team's tasks and approve/reject
+      if (task && task.teamId !== CURRENT_USER.teamId) {
+        toast.error('You can only manage tasks in your team.');
+        return;
+      }
+    }
+    // Admins can drag anything
+
     // BACKEND INTEGRATION: Supabase update task status and order
-    setLocalTasks(prev => prev.map(t => t.id === draggableId ? { ...t, status: newStatus, order: destination.index } : t));
+    setLocalTasks(prev => prev.map(t => t.id === draggableId ? { ...t, status: newStatus, order: destination.index, updatedAt: new Date().toISOString() } : t));
     onStatusChange(draggableId, newStatus);
 
     const col = COLUMNS.find(c => c.id === newStatus);
@@ -45,7 +68,7 @@ export default function KanbanColumns({ tasks, onTaskClick, onStatusChange, sele
   return (
     <DragDropContext onDragEnd={onDragEnd}>
       <div className="flex gap-0 h-full overflow-x-auto scrollbar-thin">
-        {COLUMNS.map(col => {
+        {COLUMNS.filter(col => !col.visibleRoles || col.visibleRoles.includes(CURRENT_USER.role)).map(col => {
           const colTasks = getColumnTasks(col.id);
           return (
             <div key={`col-${col.id}`} className="flex-shrink-0 w-72 xl:w-80 flex flex-col h-full border-r border-slate-200 last:border-r-0">
@@ -81,7 +104,7 @@ export default function KanbanColumns({ tasks, onTaskClick, onStatusChange, sele
                       </div>
                     )}
                     {colTasks.map((task, index) => (
-                      <Draggable key={task.id} draggableId={task.id} index={index}>
+                      <Draggable key={task.id} draggableId={task.id} index={index} isDragDisabled={isTaskBlocked(task)}>
                         {(dragProvided, dragSnapshot) => (
                           <div
                             ref={dragProvided.innerRef}

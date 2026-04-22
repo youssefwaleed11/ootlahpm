@@ -41,11 +41,13 @@ export interface Project {
   createdAt: string;
 }
 
+export type TaskStatus = 'backlog' | 'todo' | 'in_progress' | 'in_review' | 'changes_requested' | 'done';
+
 export interface Task {
   id: string;
   title: string;
   description: string;
-  status: 'todo' | 'in_progress' | 'in_review' | 'done';
+  status: TaskStatus;
   priority: 'low' | 'medium' | 'high' | 'critical';
   projectId: string;
   teamId?: string;
@@ -59,6 +61,12 @@ export interface Task {
   order: number;
   createdAt: string;
   updatedAt: string;
+  approvalComment?: string;
+  completedAt?: string;
+  approvedBy?: string;
+  changesRequestedAt?: string;
+  blockedBy?: string[];
+  blocking?: string[];
 }
 
 export interface Comment {
@@ -119,7 +127,7 @@ export const MOCK_TASKS: Task[] = [
   // proj-001 tasks
   { id: 'task-001', title: 'Design new onboarding flow wireframes', description: 'Create low-fidelity wireframes for the 5-step onboarding flow. Cover account setup, team invite, first project creation, and tutorial overlay.', status: 'done', priority: 'high', projectId: 'proj-001', teamId: 'team-001', assigneeId: 'user-003', reporterId: 'user-002', startDate: '2026-02-05', dueDate: '2026-02-20', tags: ['wireframe', 'UX'], attachmentCount: 3, commentCount: 7, order: 0, createdAt: '2026-02-01', updatedAt: '2026-02-18' },
   { id: 'task-002', title: 'Implement dark mode tokens', description: 'Set up design token system for dark mode. Define all color variables and ensure every component respects the theme switch.', status: 'in_review', priority: 'medium', projectId: 'proj-001', teamId: 'team-001', assigneeId: 'user-004', reporterId: 'user-002', startDate: '2026-02-20', dueDate: '2026-03-10', tags: ['tokens', 'design-system'], attachmentCount: 1, commentCount: 4, order: 0, createdAt: '2026-02-18', updatedAt: '2026-03-08' },
-  { id: 'task-003', title: 'Navigation redesign — bottom tab bar', description: 'Redesign the bottom navigation with 5 main tabs. Include icon + label treatment, active states, and notification badges.', status: 'in_progress', priority: 'high', projectId: 'proj-001', teamId: 'team-001', assigneeId: 'user-003', reporterId: 'user-002', startDate: '2026-03-01', dueDate: '2026-03-25', tags: ['navigation', 'mobile'], attachmentCount: 2, commentCount: 3, order: 0, createdAt: '2026-02-28', updatedAt: '2026-03-15' },
+  { id: 'task-003', title: 'Navigation redesign — bottom tab bar', description: 'Redesign the bottom navigation with 5 main tabs. Include icon + label treatment, active states, and notification badges.', status: 'in_progress', priority: 'high', projectId: 'proj-001', teamId: 'team-001', assigneeId: 'user-003', reporterId: 'user-002', startDate: '2026-03-01', dueDate: '2026-03-25', tags: ['navigation', 'mobile'], attachmentCount: 2, commentCount: 3, order: 0, createdAt: '2026-02-28', updatedAt: '2026-03-15', blockedBy: ['task-002'], blocking: [] },
   { id: 'task-004', title: 'Profile screen UI update', description: 'Update the user profile screen with new avatar upload, bio field, and linked accounts section.', status: 'todo', priority: 'low', projectId: 'proj-001', teamId: 'team-001', assigneeId: 'user-008', reporterId: 'user-002', startDate: '2026-03-20', dueDate: '2026-04-10', tags: ['profile', 'UI'], attachmentCount: 0, commentCount: 1, order: 0, createdAt: '2026-03-15', updatedAt: '2026-03-15' },
   { id: 'task-005', title: 'Push notification permission flow', description: 'Design and implement the permission request flow for push notifications. Include rationale screen and fallback for denied state.', status: 'todo', priority: 'medium', projectId: 'proj-001', teamId: 'team-001', assigneeId: 'user-004', reporterId: 'user-002', startDate: '2026-04-01', dueDate: '2026-04-20', tags: ['notifications', 'UX'], attachmentCount: 0, commentCount: 0, order: 1, createdAt: '2026-03-28', updatedAt: '2026-03-28' },
   { id: 'task-006', title: 'App store screenshots', description: 'Create 8 App Store and Play Store screenshots showcasing key features. Include device frames and localized copy.', status: 'in_progress', priority: 'medium', projectId: 'proj-001', teamId: 'team-001', assigneeId: 'user-008', reporterId: 'user-001', startDate: '2026-04-05', dueDate: '2026-04-25', tags: ['marketing', 'assets'], attachmentCount: 5, commentCount: 2, order: 1, createdAt: '2026-04-02', updatedAt: '2026-04-10' },

@@ -15,8 +15,8 @@ export interface SidebarSection {
 }
 
 export const SIDEBAR_CONFIG: SidebarItem[] = [
-  { key: 'dashboard', label: 'Dashboard', icon: 'Squares2X2Icon', path: '/kanban-board', roles: ['admin', 'team_leader', 'agent'] },
-  { key: 'my-tasks', label: 'My Tasks', icon: 'ClipboardDocumentCheckIcon', path: '/my-tasks', roles: ['agent', 'team_leader'] },
+  { key: 'dashboard', label: 'Dashboard', icon: 'Squares2X2Icon', path: '/dashboard', roles: ['admin', 'team_leader', 'agent'] },
+  { key: 'my-tasks', label: 'My Tasks', icon: 'ClipboardDocumentCheckIcon', path: '/my-tasks', roles: ['admin', 'team_leader', 'agent'] },
   { key: 'kanban', label: 'Kanban Board', icon: 'ViewColumnsIcon', path: '/kanban-board', roles: ['admin', 'team_leader', 'agent'] },
   { key: 'projects', label: 'Projects', icon: 'FolderIcon', path: '/project-management', roles: ['admin', 'team_leader', 'agent'] },
   { key: 'portfolios', label: 'Portfolios', icon: 'RectangleStackIcon', path: '/portfolios', roles: ['admin', 'team_leader'] },
@@ -25,13 +25,12 @@ export const SIDEBAR_CONFIG: SidebarItem[] = [
   { key: 'my-team', label: 'My Team', icon: 'UserGroupIcon', path: '/project-management', roles: ['admin', 'team_leader'] },
   { key: 'reporting', label: 'Reporting', icon: 'ChartBarIcon', path: '/reporting', roles: ['admin', 'team_leader'] },
   { key: 'users-roles', label: 'Users & Roles', icon: 'UsersIcon', path: '/project-management', roles: ['admin'] },
-  { key: 'billing', label: 'Billing', icon: 'CreditCardIcon', path: '/billing', roles: ['admin'] },
   { key: 'settings', label: 'Settings', icon: 'Cog6ToothIcon', path: '/settings', roles: ['admin'] },
 ];
 
 export const SIDEBAR_SECTIONS: Record<UserRole, string[]> = {
   admin: ['Workspace', 'Team', 'Administration'],
-  team_leader: ['Workspace', 'Team', 'Management'],
+  team_leader: ['Workspace', 'Team', 'My Work'],
   agent: ['Workspace', 'My Work'],
 };
 
@@ -47,7 +46,6 @@ export function getSectionItems(role: UserRole): SidebarSection[] {
     'Workspace': [],
     'My Work': [],
     'Team': [],
-    'Management': [],
     'Administration': [],
   };
 
@@ -58,13 +56,10 @@ export function getSectionItems(role: UserRole): SidebarSection[] {
     if (['my-tasks'].includes(item.key)) {
       sectionMap['My Work'].push(item);
     }
-    if (['my-team', 'team-chat'].includes(item.key)) {
+    if (['my-team', 'team-chat', 'approval-queue', 'portfolios', 'reporting'].includes(item.key)) {
       sectionMap['Team'].push(item);
     }
-    if (['approval-queue', 'portfolios', 'reporting'].includes(item.key)) {
-      sectionMap['Management'].push(item);
-    }
-    if (['users-roles', 'billing', 'settings'].includes(item.key)) {
+    if (['users-roles', 'settings'].includes(item.key)) {
       sectionMap['Administration'].push(item);
     }
   });

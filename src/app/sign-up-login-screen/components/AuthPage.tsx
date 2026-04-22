@@ -37,7 +37,7 @@ export default function AuthPage() {
       return;
     }
     toast.success(`Welcome back! Signed in as ${valid.role}.`);
-    router.push('/kanban-board');
+    router.push('/dashboard');
   };
 
   const handleSignupSubmit = async (data: SignupForm) => {
@@ -71,7 +71,7 @@ export default function AuthPage() {
         <div className="relative z-10 flex flex-col items-center text-center max-w-md px-8">
           <div className="flex items-center gap-3 mb-10">
             <AppLogo size={48} />
-            <span className="text-white text-3xl font-800 tracking-tight">OotlahPM</span>
+            <span className="text-white text-3xl font-800 tracking-tight">Ootlah</span>
           </div>
 
           <div className="w-full rounded-2xl overflow-hidden shadow-2xl mb-8 border border-white/10">

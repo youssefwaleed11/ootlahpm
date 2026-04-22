@@ -74,7 +74,7 @@ function SidebarContent({ collapsed, onToggle, currentPath, onChatToggle, chatOp
         {!collapsed && (
           <div className="flex items-center gap-2 min-w-0">
             <AppLogo size={32} />
-            <span className="font-display text-white font-700 text-base tracking-tight truncate">OotlahPM</span>
+            <span className="font-display text-white font-700 text-base tracking-tight truncate">Ootlah</span>
           </div>
         )}
         {collapsed && <AppLogo size={32} />}
