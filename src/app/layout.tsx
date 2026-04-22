@@ -9,10 +9,10 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: 'OotlahPM — Team Project Management, Simplified',
-  description: 'OotlahPM helps teams manage projects, assign tasks, and collaborate in real-time with Kanban boards, team chat, and role-based access control.',
+  title: 'Ootlah Project Management System 2026',
+  description: 'Professional project management system for digital marketing agencies. Manage projects, tasks, teams, and portfolios with role-based access and real-time collaboration.',
   icons: {
-    icon: [{ url: '/favicon.ico', type: 'image/x-icon' }],
+    icon: [{ url: '/favicon.ico', type: 'image/x-icon' }, { url: '/logo.png', type: 'image/png' }],
   },
 };
 
