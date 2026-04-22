@@ -28,6 +28,7 @@ export const SIDEBAR_CONFIG: SidebarItem[] = [
   
   // Admin Only
   { key: 'team-management', label: 'Team Management', icon: 'UserGroupIcon', path: '/team-management', roles: ['admin'] },
+  { key: 'departments', label: 'Departments', icon: 'RectangleGroupIcon', path: '/departments', roles: ['admin'] },
   { key: 'users-roles', label: 'Users & Roles', icon: 'UsersIcon', path: '/users-roles', roles: ['admin'] },
   { key: 'settings', label: 'Settings', icon: 'Cog6ToothIcon', path: '/settings', roles: ['admin'] },
 ];
@@ -56,7 +57,7 @@ export function getSectionItems(role: UserRole): SidebarSection[] {
     if (['dashboard', 'workflow', 'my-tasks', 'projects'].includes(item.key)) {
       sectionMap['Main'].push(item);
     }
-    if (['portfolios', 'approval-queue', 'reporting', 'team-management'].includes(item.key)) {
+    if (['portfolios', 'approval-queue', 'reporting', 'team-management', 'departments'].includes(item.key)) {
       sectionMap['Management'].push(item);
     }
     if (['users-roles', 'settings'].includes(item.key)) {

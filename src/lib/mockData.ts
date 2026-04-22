@@ -14,12 +14,24 @@ export interface User {
   joinedAt: string;
 }
 
+export interface Department {
+  id: string;
+  name: string;
+  description: string;
+  color: string;
+  headId?: string;
+  memberIds: string[];
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface Team {
   id: string;
   name: string;
   leaderId: string;
   memberIds: string[];
   projectIds: string[];
+  departmentId?: string;
   color: string;
   createdAt: string;
 }
@@ -112,10 +124,20 @@ export const MOCK_USERS: User[] = [
   { id: 'user-010', name: 'Karim Saleh', email: 'karim@ootlah.com', role: 'agent', avatar: 'KS', teamId: 'team-003', isOnline: true, joinedAt: '2025-03-18' },
 ];
 
+export const MOCK_DEPARTMENTS: Department[] = [
+  { id: 'dept-001', name: 'BD (Business Development)', description: 'Business development and client acquisition', color: '#3B82F6', headId: 'user-001', memberIds: ['user-001', 'user-002'], createdAt: '2025-01-01', updatedAt: '2025-01-01' },
+  { id: 'dept-002', name: 'Marketing', description: 'Strategic marketing and campaigns', color: '#EC4899', headId: 'user-002', memberIds: ['user-002', 'user-003', 'user-004'], createdAt: '2025-01-01', updatedAt: '2025-01-01' },
+  { id: 'dept-003', name: 'SEO', description: 'Search engine optimization and organic growth', color: '#F97316', headId: 'user-002', memberIds: ['user-002', 'user-008'], createdAt: '2025-01-20', updatedAt: '2025-01-20' },
+  { id: 'dept-004', name: 'Content', description: 'Content creation and copywriting', color: '#8B5CF6', headId: 'user-003', memberIds: ['user-003', 'user-004'], createdAt: '2025-01-20', updatedAt: '2025-01-20' },
+  { id: 'dept-005', name: 'Designers', description: 'Graphic design and creative assets', color: '#10B981', headId: 'user-009', memberIds: ['user-009', 'user-010'], createdAt: '2025-03-10', updatedAt: '2025-03-10' },
+  { id: 'dept-006', name: 'Social Media', description: 'Social media management and community', color: '#06B6D4', headId: 'user-009', memberIds: ['user-009', 'user-010'], createdAt: '2025-03-10', updatedAt: '2025-03-10' },
+  { id: 'dept-007', name: 'Media Buying', description: 'Paid media and advertising campaigns', color: '#0D9488', headId: 'user-005', memberIds: ['user-005', 'user-006', 'user-007'], createdAt: '2025-02-05', updatedAt: '2025-02-05' },
+];
+
 export const MOCK_TEAMS: Team[] = [
-  { id: 'team-001', name: 'SEO & Content', leaderId: 'user-002', memberIds: ['user-002', 'user-003', 'user-004', 'user-008'], projectIds: ['proj-001', 'proj-003'], color: '#F97316', createdAt: '2025-01-20' },
-  { id: 'team-002', name: 'Media Buying & PPC', leaderId: 'user-005', memberIds: ['user-005', 'user-006', 'user-007'], projectIds: ['proj-002', 'proj-004'], color: '#0D9488', createdAt: '2025-02-05' },
-  { id: 'team-003', name: 'Social Media & Design', leaderId: 'user-009', memberIds: ['user-009', 'user-010'], projectIds: ['proj-005'], color: '#06B6D4', createdAt: '2025-03-10' },
+  { id: 'team-001', name: 'SEO & Content', leaderId: 'user-002', memberIds: ['user-002', 'user-003', 'user-004', 'user-008'], projectIds: ['proj-001', 'proj-003'], departmentId: 'dept-003', color: '#F97316', createdAt: '2025-01-20' },
+  { id: 'team-002', name: 'Media Buying & PPC', leaderId: 'user-005', memberIds: ['user-005', 'user-006', 'user-007'], projectIds: ['proj-002', 'proj-004'], departmentId: 'dept-007', color: '#0D9488', createdAt: '2025-02-05' },
+  { id: 'team-003', name: 'Social Media & Design', leaderId: 'user-009', memberIds: ['user-009', 'user-010'], projectIds: ['proj-005'], departmentId: 'dept-006', color: '#06B6D4', createdAt: '2025-03-10' },
 ];
 
 export const MOCK_PROJECTS: Project[] = [
