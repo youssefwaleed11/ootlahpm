@@ -1,80 +1,33 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import AppLayout from '@/components/AppLayout';
 import Icon from '@/components/ui/AppIcon';
-
-interface Task {
-  id: string;
-  title: string;
-  project: string;
-  priority: 'low' | 'medium' | 'high' | 'critical';
-  status: 'todo' | 'in_progress' | 'in_review' | 'completed';
-  dueDate: string;
-  department: string;
-}
+import { useTasks, Task } from '@/hooks/useTasks';
+import { TaskPanel } from '@/components/TaskPanel';
+import { useRouter } from 'next/navigation';
 
 export default function MyTasksPage() {
+  const router = useRouter();
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [filterPriority, setFilterPriority] = useState<string>('all');
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+  const [user, setUser] = useState<any>(null);
 
-  const tasks: Task[] = [
-    {
-      id: '1',
-      title: 'Review Q2 Marketing Strategy',
-      project: 'Marketing Campaign Q2',
-      priority: 'high',
-      status: 'in_progress',
-      dueDate: '2024-04-25',
-      department: 'marketing',
-    },
-    {
-      id: '2',
-      title: 'Create Blog Post on SEO Best Practices',
-      project: 'Content Strategy 2024',
-      priority: 'medium',
-      status: 'todo',
-      dueDate: '2024-04-28',
-      department: 'content',
-    },
-    {
-      id: '3',
-      title: 'Analyze Competitor Keywords',
-      project: 'SEO Optimization',
-      priority: 'high',
-      status: 'in_progress',
-      dueDate: '2024-04-23',
-      department: 'seo',
-    },
-    {
-      id: '4',
-      title: 'Design Social Media Graphics',
-      project: 'Social Media Campaign',
-      priority: 'medium',
-      status: 'in_review',
-      dueDate: '2024-04-26',
-      department: 'designers',
-    },
-    {
-      id: '5',
-      title: 'Client Meeting Preparation',
-      project: 'Client A - Brand Refresh',
-      priority: 'critical',
-      status: 'todo',
-      dueDate: '2024-04-22',
-      department: 'bd',
-    },
-    {
-      id: '6',
-      title: 'Instagram Content Calendar',
-      project: 'Social Strategy Q2',
-      priority: 'low',
-      status: 'completed',
-      dueDate: '2024-04-20',
-      department: 'social-media',
-    },
-  ];
+  const { tasks, isLoading, error } = useTasks();
 
-  const filteredTasks = tasks.filter(task => {
+  useEffect(() => {
+    const userData = localStorage.getItem('user');
+    if (!userData) {
+      router.push('/login');
+      return;
+    }
+    setUser(JSON.parse(userData));
+  }, []);
+
+  // Filter tasks assigned to current user
+  const myTasks = tasks.filter(t => t.assigned_to?.id === user?.id);
+
+  const filteredTasks = myTasks.filter(task => {
     const statusMatch = filterStatus === 'all' || task.status === filterStatus;
     const priorityMatch = filterPriority === 'all' || task.priority === filterPriority;
     return statusMatch && priorityMatch;
@@ -157,54 +110,75 @@ export default function MyTasksPage() {
           </div>
         </div>
 
-        {/* Tasks List */}
-        <div className="space-y-3">
-          {filteredTasks.map(task => (
-            <div
-              key={task.id}
-              className={`rounded-lg border p-4 transition-all hover:shadow-md cursor-pointer ${getStatusColor(task.status)}`}
-            >
-              <div className="flex items-start gap-4">
-                {/* Checkbox */}
-                <input
-                  type="checkbox"
-                  checked={task.status === 'completed'}
-                  className="w-5 h-5 mt-0.5 rounded accent-red-600"
-                />
+        {/* Loading State */}
+        {isLoading && (
+          <div className="text-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-500 mx-auto mb-4"></div>
+            <p className="text-slate-600">Loading your tasks...</p>
+          </div>
+        )}
 
-                {/* Content */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-start justify-between gap-2 mb-2">
-                    <h3 className={`font-700 text-slate-900 ${task.status === 'completed' ? 'line-through text-slate-500' : ''}`}>
-                      {task.title}
-                    </h3>
-                    <span className={`text-xs font-600 px-2 py-1 rounded border whitespace-nowrap ${getPriorityColor(task.priority)}`}>
-                      {task.priority}
-                    </span>
-                  </div>
-                  <p className="text-sm text-slate-600 mb-3">{task.project}</p>
-                  <div className="flex items-center gap-3 text-xs text-slate-600">
-                    <span className="flex items-center gap-1">
-                      <Icon name="CalendarIcon" size={14} />
-                      {new Date(task.dueDate).toLocaleDateString()}
-                      {isOverdue(task.dueDate) && task.status !== 'completed' && (
-                        <Icon name="ExclamationTriangleIcon" size={14} className="text-red-600 ml-1" />
+        {/* Error State */}
+        {error && (
+          <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
+            {error}
+          </div>
+        )}
+
+        {/* Tasks List */}
+        {!isLoading && !error && (
+          <div className="space-y-3">
+            {filteredTasks.map(task => (
+              <button
+                key={task.id}
+                onClick={() => setSelectedTask(task)}
+                className={`w-full text-left rounded-lg border p-4 transition-all hover:shadow-md ${getStatusColor(task.status)}`}
+              >
+                <div className="flex items-start gap-4">
+                  {/* Checkbox */}
+                  <input
+                    type="checkbox"
+                    checked={task.status === 'completed'}
+                    readOnly
+                    className="w-5 h-5 mt-0.5 rounded accent-red-600"
+                  />
+
+                  {/* Content */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-start justify-between gap-2 mb-2">
+                      <h3 className={`font-700 text-slate-900 ${task.status === 'completed' ? 'line-through text-slate-500' : ''}`}>
+                        {task.title}
+                      </h3>
+                      <span className={`text-xs font-600 px-2 py-1 rounded border whitespace-nowrap ${getPriorityColor(task.priority)}`}>
+                        {task.priority}
+                      </span>
+                    </div>
+                    <p className="text-sm text-slate-600 mb-3">{task.project?.name || 'Untitled'}</p>
+                    <div className="flex items-center gap-3 text-xs text-slate-600">
+                      {task.due_date && (
+                        <span className="flex items-center gap-1">
+                          <Icon name="CalendarIcon" size={14} />
+                          {new Date(task.due_date).toLocaleDateString()}
+                        </span>
                       )}
-                    </span>
-                    <span className={`px-2 py-0.5 bg-slate-200 rounded text-slate-700 font-600`}>
-                      {task.status.replace('_', ' ')}
-                    </span>
+                      <span className={`px-2 py-0.5 bg-slate-200 rounded text-slate-700 font-600`}>
+                        {task.status.replace('_', ' ')}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Actions */}
+                  <div className="p-2 rounded flex-shrink-0">
+                    <Icon name="ChevronRightIcon" size={18} className="text-slate-600" />
                   </div>
                 </div>
+              </button>
+            ))}
+          </div>
+        )}
 
-                {/* Actions */}
-                <button className="p-2 rounded hover:bg-white/50 transition-colors flex-shrink-0">
-                  <Icon name="ChevronRightIcon" size={18} className="text-slate-600" />
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
+        {/* Task Panel */}
+        <TaskPanel task={selectedTask} onClose={() => setSelectedTask(null)} />
 
         {/* Empty State */}
         {filteredTasks.length === 0 && (
