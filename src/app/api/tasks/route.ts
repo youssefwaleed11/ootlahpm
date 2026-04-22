@@ -1,134 +1,94 @@
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
-import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
+
+// Demo tasks database
+const DEMO_TASKS = [
+  {
+    id: 'task-001',
+    title: 'Review Q2 Marketing Strategy',
+    description: 'Review the marketing strategy for Q2 and provide feedback',
+    project_id: 'proj-001',
+    project: { name: 'Marketing Campaign Q2' },
+    assigned_to: { id: 'user-member-001', full_name: 'Nour Team Member', avatar_url: null },
+    created_by: { id: 'user-admin-001', full_name: 'Layla Admin' },
+    priority: 'high',
+    status: 'in_progress',
+    due_date: '2026-04-25',
+    department: { name: 'Marketing', color: 'blue' },
+    created_at: '2026-04-22T10:00:00Z',
+  },
+  {
+    id: 'task-002',
+    title: 'Create Blog Post on SEO Best Practices',
+    description: 'Write a comprehensive blog post about SEO best practices',
+    project_id: 'proj-002',
+    project: { name: 'Content Strategy 2024' },
+    assigned_to: { id: 'user-member-001', full_name: 'Nour Team Member', avatar_url: null },
+    created_by: { id: 'user-admin-001', full_name: 'Layla Admin' },
+    priority: 'medium',
+    status: 'todo',
+    due_date: '2026-04-28',
+    department: { name: 'Content', color: 'purple' },
+    created_at: '2026-04-20T14:30:00Z',
+  },
+  {
+    id: 'task-003',
+    title: 'Analyze Competitor Keywords',
+    description: 'Conduct competitive keyword analysis for our target market',
+    project_id: 'proj-003',
+    project: { name: 'SEO Optimization' },
+    assigned_to: { id: 'user-manager-001', full_name: 'Omar Manager', avatar_url: null },
+    created_by: { id: 'user-admin-001', full_name: 'Layla Admin' },
+    priority: 'high',
+    status: 'in_progress',
+    due_date: '2026-04-23',
+    department: { name: 'SEO', color: 'green' },
+    created_at: '2026-04-19T09:15:00Z',
+  },
+];
 
 export async function GET(request: NextRequest) {
   try {
-    const supabase = createServerComponentClient({ cookies });
-    const { data: { user } } = await supabase.auth.getUser();
-
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
     const { searchParams } = new URL(request.url);
-    const projectId = searchParams.get('projectId');
-    const departmentId = searchParams.get('departmentId');
     const status = searchParams.get('status');
     const assignedTo = searchParams.get('assignedTo');
 
-    let query = supabase
-      .from('tasks')
-      .select(`
-        *,
-        assigned_to:users!assigned_to(id, full_name, avatar_url),
-        created_by:users!created_by(id, full_name),
-        project:projects(name),
-        department:departments(name, color)
-      `);
-
-    if (projectId) {
-      query = query.eq('project_id', projectId);
-    }
-
-    if (departmentId) {
-      query = query.eq('department_id', departmentId);
-    }
+    let tasks = [...DEMO_TASKS];
 
     if (status) {
-      query = query.eq('status', status);
+      tasks = tasks.filter(t => t.status === status);
     }
 
     if (assignedTo) {
-      query = query.eq('assigned_to', assignedTo);
-    }
-
-    const { data: tasks, error } = await query.order('created_at', { ascending: false });
-
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      tasks = tasks.filter(t => t.assigned_to.id === assignedTo);
     }
 
     return NextResponse.json({ tasks });
   } catch (error) {
-    console.error('Error fetching tasks:', error);
+    console.error('[v0] Error fetching tasks:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
 
 export async function POST(request: NextRequest) {
   try {
-    const supabase = createServerComponentClient({ cookies });
-    const { data: { user } } = await supabase.auth.getUser();
+    const body = await request.json();
+    
+    const newTask = {
+      id: `task-${Date.now()}`,
+      ...body,
+      created_at: new Date().toISOString(),
+    };
 
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const { 
-      title,
-      description,
-      projectId,
-      departmentId,
-      assignedTo,
-      priority = 'medium',
-      dueDate,
-      status = 'todo'
-    } = await request.json();
-
-    if (!title || !projectId || !departmentId) {
-      return NextResponse.json(
-        { error: 'Title, projectId, and departmentId required' },
-        { status: 400 }
-      );
-    }
-
-    // Get organization_id from user
-    const { data: userData } = await supabase
-      .from('users')
-      .select('organization_id')
-      .eq('id', user.id)
-      .single();
-
-    // Create the task
-    const { data: task, error } = await supabase
-      .from('tasks')
-      .insert({
-        title,
-        description,
-        project_id: projectId,
-        department_id: departmentId,
-        assigned_to: assignedTo || null,
-        priority,
-        due_date: dueDate,
-        status,
-        created_by: user.id,
-        organization_id: userData.organization_id,
-      })
-      .select()
-      .single();
-
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
-    }
-
-    return NextResponse.json(task, { status: 201 });
+    DEMO_TASKS.push(newTask);
+    return NextResponse.json(newTask, { status: 201 });
   } catch (error) {
-    console.error('Error creating task:', error);
+    console.error('[v0] Error creating task:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
 
-// PATCH - Update task
 export async function PATCH(request: NextRequest) {
   try {
-    const supabase = createServerComponentClient({ cookies });
-    const { data: { user } } = await supabase.auth.getUser();
-
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
     const { searchParams } = new URL(request.url);
     const taskId = searchParams.get('id');
 
@@ -137,26 +97,16 @@ export async function PATCH(request: NextRequest) {
     }
 
     const updates = await request.json();
+    const taskIndex = DEMO_TASKS.findIndex(t => t.id === taskId);
 
-    // If status is being updated to 'completed', set completed_at
-    if (updates.status === 'completed') {
-      updates.completed_at = new Date().toISOString();
+    if (taskIndex === -1) {
+      return NextResponse.json({ error: 'Task not found' }, { status: 404 });
     }
 
-    const { data: task, error } = await supabase
-      .from('tasks')
-      .update(updates)
-      .eq('id', taskId)
-      .select()
-      .single();
-
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
-    }
-
-    return NextResponse.json(task);
+    DEMO_TASKS[taskIndex] = { ...DEMO_TASKS[taskIndex], ...updates };
+    return NextResponse.json(DEMO_TASKS[taskIndex]);
   } catch (error) {
-    console.error('Error updating task:', error);
+    console.error('[v0] Error updating task:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
