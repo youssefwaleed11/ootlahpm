@@ -1,7 +1,7 @@
 'use client';
 import React, { useState } from 'react';
 import Icon from '@/components/ui/AppIcon';
-import { getUserById, getTeamById, formatDate, isOverdue, MOCK_USERS, type Task } from '@/lib/mockData';
+import { getUserById, getTeamById, formatDate, isOverdue, MOCK_USERS, MOCK_TASKS, type Task, type TaskStatus } from '@/lib/mockData';
 import { toast } from 'sonner';
 
 interface TaskDetailPanelProps {
@@ -10,6 +10,7 @@ interface TaskDetailPanelProps {
   onUpdate: (task: Task) => void;
   onOpenChat: () => void;
   chatOpen: boolean;
+  allTasks?: Task[];
 }
 
 const PRIORITY_CONFIG = {
@@ -19,14 +20,16 @@ const PRIORITY_CONFIG = {
   critical: { label: 'Critical', className: 'bg-red-100 text-red-600' },
 };
 
-const STATUS_CONFIG = {
+const STATUS_CONFIG: Record<TaskStatus, { label: string; className: string }> = {
+  backlog: { label: 'Backlog', className: 'bg-slate-100 text-slate-500' },
   todo: { label: 'To Do', className: 'bg-slate-100 text-slate-600' },
   in_progress: { label: 'In Progress', className: 'bg-blue-100 text-blue-700' },
   in_review: { label: 'In Review', className: 'bg-amber-100 text-amber-700' },
+  changes_requested: { label: 'Changes Requested', className: 'bg-red-100 text-red-600' },
   done: { label: 'Done', className: 'bg-emerald-100 text-emerald-700' },
 };
 
-export default function TaskDetailPanel({ task, onClose, onUpdate, onOpenChat, chatOpen }: TaskDetailPanelProps) {
+export default function TaskDetailPanel({ task, onClose, onUpdate, onOpenChat, chatOpen, allTasks = MOCK_TASKS }: TaskDetailPanelProps) {
   const [editingTitle, setEditingTitle] = useState(false);
   const [editingDesc, setEditingDesc] = useState(false);
   const [titleValue, setTitleValue] = useState(task.title);
@@ -39,6 +42,11 @@ export default function TaskDetailPanel({ task, onClose, onUpdate, onOpenChat, c
   const reporter = getUserById(task.reporterId);
   const team = task.teamId ? getTeamById(task.teamId) : null;
   const overdue = isOverdue(task.dueDate) && task.status !== 'done';
+  const approvedByUser = task.approvedBy ? getUserById(task.approvedBy) : null;
+
+  // Dependencies
+  const blockedByTasks = (task.blockedBy || []).map(id => allTasks.find(t => t.id === id)).filter(Boolean) as Task[];
+  const blockingTasks = allTasks.filter(t => (t.blockedBy || []).includes(task.id));
 
   const handleTitleSave = () => {
     if (titleValue.trim()) {
@@ -54,7 +62,7 @@ export default function TaskDetailPanel({ task, onClose, onUpdate, onOpenChat, c
     setEditingDesc(false);
   };
 
-  const handleStatusChange = (status: Task['status']) => {
+  const handleStatusChange = (status: TaskStatus) => {
     onUpdate({ ...task, status });
     setStatusDropOpen(false);
     toast.success(`Status changed to ${STATUS_CONFIG[status].label}`);
@@ -67,11 +75,15 @@ export default function TaskDetailPanel({ task, onClose, onUpdate, onOpenChat, c
   };
 
   const handleAssigneeChange = (userId: string) => {
-    // BACKEND INTEGRATION: Supabase update task + Resend email notification to new assignee
     onUpdate({ ...task, assigneeId: userId });
     setAssigneeDropOpen(false);
     const user = getUserById(userId);
     toast.success(`Assigned to ${user?.name}`);
+  };
+
+  const statusDotColor: Record<TaskStatus, string> = {
+    backlog: 'bg-slate-300', todo: 'bg-slate-400', in_progress: 'bg-blue-500',
+    in_review: 'bg-amber-500', changes_requested: 'bg-red-500', done: 'bg-emerald-500',
   };
 
   return (
@@ -107,16 +119,14 @@ export default function TaskDetailPanel({ task, onClose, onUpdate, onOpenChat, c
           {/* Title */}
           <div>
             {editingTitle ? (
-              <div>
-                <input
-                  autoFocus
-                  value={titleValue}
-                  onChange={e => setTitleValue(e.target.value)}
-                  onBlur={handleTitleSave}
-                  onKeyDown={e => { if (e.key === 'Enter') handleTitleSave(); if (e.key === 'Escape') setEditingTitle(false); }}
-                  className="w-full text-base font-700 text-slate-800 bg-slate-50 border border-brand-orange/50 rounded-lg px-2 py-1 focus:outline-none focus:ring-2 focus:ring-brand-orange/30"
-                />
-              </div>
+              <input
+                autoFocus
+                value={titleValue}
+                onChange={e => setTitleValue(e.target.value)}
+                onBlur={handleTitleSave}
+                onKeyDown={e => { if (e.key === 'Enter') handleTitleSave(); if (e.key === 'Escape') setEditingTitle(false); }}
+                className="w-full text-base font-700 text-slate-800 bg-slate-50 border border-brand-orange/50 rounded-lg px-2 py-1 focus:outline-none focus:ring-2 focus:ring-brand-orange/30"
+              />
             ) : (
               <h2
                 onClick={() => setEditingTitle(true)}
@@ -128,6 +138,25 @@ export default function TaskDetailPanel({ task, onClose, onUpdate, onOpenChat, c
             )}
           </div>
 
+          {/* Approval comment */}
+          {task.approvalComment && (
+            <div className="p-3 bg-red-50 rounded-xl border border-red-100">
+              <div className="flex items-center gap-1.5 mb-1">
+                <Icon name="ArrowUturnLeftIcon" size={12} className="text-red-500" />
+                <span className="text-[11px] font-700 text-red-600">Changes Requested</span>
+              </div>
+              <p className="text-xs text-red-700 leading-relaxed">{task.approvalComment}</p>
+            </div>
+          )}
+
+          {/* Approved by */}
+          {task.status === 'done' && approvedByUser && (
+            <div className="p-3 bg-emerald-50 rounded-xl border border-emerald-100 flex items-center gap-2">
+              <Icon name="CheckCircleIcon" size={14} className="text-emerald-500" />
+              <span className="text-xs text-emerald-700 font-500">Approved by <strong>{approvedByUser.name}</strong></span>
+            </div>
+          )}
+
           {/* Status + Priority row */}
           <div className="grid grid-cols-2 gap-2">
             {/* Status */}
@@ -137,18 +166,24 @@ export default function TaskDetailPanel({ task, onClose, onUpdate, onOpenChat, c
                 onClick={() => setStatusDropOpen(!statusDropOpen)}
                 className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs font-600 border border-transparent hover:border-slate-200 transition-all duration-150 ${STATUS_CONFIG[task.status].className}`}
               >
-                {STATUS_CONFIG[task.status].label}
+                <div className="flex items-center gap-1.5">
+                  <div className={`w-1.5 h-1.5 rounded-full ${statusDotColor[task.status]}`} />
+                  {STATUS_CONFIG[task.status].label}
+                </div>
                 <Icon name="ChevronDownIcon" size={12} />
               </button>
               {statusDropOpen && (
                 <div className="absolute top-full left-0 mt-1 w-full bg-white rounded-lg border border-slate-200 shadow-card z-20 overflow-hidden fade-in">
-                  {(Object.keys(STATUS_CONFIG) as Task['status'][]).map(s => (
+                  {(Object.keys(STATUS_CONFIG) as TaskStatus[]).map(s => (
                     <button
                       key={`status-opt-${s}`}
                       onClick={() => handleStatusChange(s)}
-                      className={`w-full text-left px-2.5 py-1.5 text-xs font-600 hover:bg-slate-50 transition-colors ${STATUS_CONFIG[s].className.split(' ').slice(0, 1).join(' ')} hover:opacity-80`}
+                      className={`w-full text-left px-2.5 py-1.5 text-xs font-600 hover:bg-slate-50 transition-colors`}
                     >
-                      {STATUS_CONFIG[s].label}
+                      <div className="flex items-center gap-1.5">
+                        <div className={`w-1.5 h-1.5 rounded-full ${statusDotColor[s]}`} />
+                        {STATUS_CONFIG[s].label}
+                      </div>
                     </button>
                   ))}
                 </div>
@@ -265,6 +300,45 @@ export default function TaskDetailPanel({ task, onClose, onUpdate, onOpenChat, c
             </div>
           )}
 
+          {/* Dependencies */}
+          {(blockedByTasks.length > 0 || blockingTasks.length > 0) && (
+            <div>
+              <p className="text-[10px] font-600 text-slate-400 uppercase tracking-wider mb-1.5">Dependencies</p>
+              <div className="space-y-2">
+                {blockedByTasks.length > 0 && (
+                  <div>
+                    <p className="text-[10px] text-slate-500 font-500 mb-1">Blocked by</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {blockedByTasks.map(dep => (
+                        <span
+                          key={dep.id}
+                          className={`inline-flex items-center gap-1 text-[10px] font-600 px-2 py-0.5 rounded-full border ${dep.status === 'done' ? 'bg-emerald-50 border-emerald-200 text-emerald-700' : 'bg-red-50 border-red-200 text-red-600'}`}
+                        >
+                          {dep.status === 'done' ? '✓' : '🔒'} {dep.title.slice(0, 25)}{dep.title.length > 25 ? '…' : ''}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {blockingTasks.length > 0 && (
+                  <div>
+                    <p className="text-[10px] text-slate-500 font-500 mb-1">Blocking</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {blockingTasks.map(dep => (
+                        <span
+                          key={dep.id}
+                          className="inline-flex items-center gap-1 text-[10px] font-600 px-2 py-0.5 rounded-full border bg-amber-50 border-amber-200 text-amber-700"
+                        >
+                          ⏳ {dep.title.slice(0, 25)}{dep.title.length > 25 ? '…' : ''}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
           {/* Tags */}
           {task.tags.length > 0 && (
             <div>
@@ -292,18 +366,8 @@ export default function TaskDetailPanel({ task, onClose, onUpdate, onOpenChat, c
                   className="w-full text-sm text-slate-700 bg-slate-50 border border-brand-orange/50 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-orange/30 resize-none scrollbar-thin"
                 />
                 <div className="flex gap-2 mt-2">
-                  <button
-                    onClick={handleDescSave}
-                    className="px-3 py-1 bg-brand-orange text-white text-xs font-600 rounded-lg hover:bg-brand-orange-dark transition-colors active:scale-95"
-                  >
-                    Save
-                  </button>
-                  <button
-                    onClick={() => { setDescValue(task.description); setEditingDesc(false); }}
-                    className="px-3 py-1 bg-slate-100 text-slate-600 text-xs font-600 rounded-lg hover:bg-slate-200 transition-colors"
-                  >
-                    Cancel
-                  </button>
+                  <button onClick={handleDescSave} className="px-3 py-1 bg-brand-orange text-white text-xs font-600 rounded-lg hover:bg-brand-orange-dark transition-colors active:scale-95">Save</button>
+                  <button onClick={() => { setDescValue(task.description); setEditingDesc(false); }} className="px-3 py-1 bg-slate-100 text-slate-600 text-xs font-600 rounded-lg hover:bg-slate-200 transition-colors">Cancel</button>
                 </div>
               </div>
             ) : (

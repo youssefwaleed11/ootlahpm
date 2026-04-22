@@ -5,7 +5,8 @@ import KanbanHeader from './KanbanHeader';
 import KanbanColumns from './KanbanColumns';
 import TaskDetailPanel from './TaskDetailPanel';
 import TaskChatPanel from './TaskChatPanel';
-import { MOCK_TASKS, MOCK_PROJECTS, type Task } from '@/lib/mockData';
+import { MOCK_TASKS, MOCK_PROJECTS, type Task, type TaskStatus } from '@/lib/mockData';
+import { toast } from 'sonner';
 
 export default function KanbanBoardPage() {
   const [selectedProjectId, setSelectedProjectId] = useState('proj-001');
@@ -21,17 +22,47 @@ export default function KanbanBoardPage() {
   };
 
   const handleTaskUpdate = (updatedTask: Task) => {
-    // BACKEND INTEGRATION: Supabase update task + trigger real-time notification
     setTasks(prev => prev.map(t => t.id === updatedTask.id ? updatedTask : t));
     setSelectedTask(updatedTask);
   };
 
-  const handleStatusChange = (taskId: string, newStatus: Task['status']) => {
-    // BACKEND INTEGRATION: Supabase update task status + send Resend email if assigned user
-    setTasks(prev => prev.map(t => t.id === taskId ? { ...t, status: newStatus, updatedAt: new Date().toISOString() } : t));
+  const handleStatusChange = (taskId: string, newStatus: TaskStatus, approvalComment?: string, approvedBy?: string) => {
+    setTasks(prev => prev.map(t => {
+      if (t.id !== taskId) return t;
+      const updates: Partial<Task> = { status: newStatus, updatedAt: new Date().toISOString() };
+      if (approvalComment !== undefined) updates.approvalComment = approvalComment;
+      if (approvedBy !== undefined) { updates.approvedBy = approvedBy; updates.completedAt = new Date().toISOString(); }
+      if (newStatus === 'done' && !approvedBy) updates.completedAt = new Date().toISOString();
+      // Check if any tasks are now unblocked
+      const updatedTasks = prev.map(t2 => t2.id === taskId ? { ...t2, ...updates } : t2);
+      if (newStatus === 'done') {
+        updatedTasks.forEach(t2 => {
+          if ((t2.blockedBy || []).includes(taskId)) {
+            const allBlockersDone = (t2.blockedBy || []).every(bid => {
+              const blocker = updatedTasks.find(x => x.id === bid);
+              return blocker?.status === 'done';
+            });
+            if (allBlockersDone) {
+              setTimeout(() => toast.success(`🔓 "${t2.title}" is now unblocked and ready to start!`), 300);
+            }
+          }
+        });
+      }
+      return { ...t, ...updates };
+    }));
     if (selectedTask?.id === taskId) {
-      setSelectedTask(prev => prev ? { ...prev, status: newStatus } : null);
+      setSelectedTask(prev => {
+        if (!prev) return null;
+        const updates: Partial<Task> = { status: newStatus };
+        if (approvalComment !== undefined) updates.approvalComment = approvalComment;
+        if (approvedBy !== undefined) updates.approvedBy = approvedBy;
+        return { ...prev, ...updates };
+      });
     }
+  };
+
+  const handleTaskCreated = (task: Task) => {
+    setTasks(prev => [...prev, task]);
   };
 
   const handleClosePanel = () => {
@@ -46,9 +77,9 @@ export default function KanbanBoardPage() {
           selectedProjectId={selectedProjectId}
           onProjectChange={setSelectedProjectId}
           projects={MOCK_PROJECTS.filter(p => p.status !== 'archived')}
+          onTaskCreated={handleTaskCreated}
         />
         <div className="flex flex-1 overflow-hidden">
-          {/* Kanban board */}
           <div className={`flex-1 overflow-hidden transition-all duration-300 ${selectedTask ? 'lg:mr-0' : ''}`}>
             <KanbanColumns
               tasks={projectTasks}
@@ -58,7 +89,6 @@ export default function KanbanBoardPage() {
             />
           </div>
 
-          {/* Task detail + chat panels */}
           {selectedTask && (
             <div className="flex border-l border-slate-200 slide-in-right">
               <TaskDetailPanel
@@ -67,6 +97,7 @@ export default function KanbanBoardPage() {
                 onUpdate={handleTaskUpdate}
                 onOpenChat={() => setChatTaskOpen(!chatTaskOpen)}
                 chatOpen={chatTaskOpen}
+                allTasks={tasks}
               />
               {chatTaskOpen && (
                 <TaskChatPanel

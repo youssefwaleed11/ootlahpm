@@ -37,7 +37,7 @@ export default function AuthPage() {
       return;
     }
     toast.success(`Welcome back! Signed in as ${valid.role}.`);
-    router.push('/kanban-board');
+    router.push('/dashboard');
   };
 
   const handleSignupSubmit = async (data: SignupForm) => {
