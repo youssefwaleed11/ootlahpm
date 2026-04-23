@@ -59,31 +59,31 @@ export function TaskPanel({ task, onClose }: TaskPanelProps) {
             {/* Task Details */}
             <div className="space-y-4 mb-8">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
-                  Status
-                </label>
-                <span className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${
-                  task.status === 'completed'
-                    ? 'bg-green-100 text-green-800'
-                    : task.status === 'in_progress'
-                    ? 'bg-blue-100 text-blue-800'
-                    : 'bg-slate-100 text-slate-800'
-                }`}>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Status</label>
+                <span
+                  className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${
+                    task.status === 'completed'
+                      ? 'bg-green-100 text-green-800'
+                      : task.status === 'in_progress'
+                        ? 'bg-blue-100 text-blue-800'
+                        : 'bg-slate-100 text-slate-800'
+                  }`}
+                >
                   {task.status.replace('_', ' ')}
                 </span>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
-                  Priority
-                </label>
-                <span className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${
-                  task.priority === 'critical'
-                    ? 'bg-red-100 text-red-800'
-                    : task.priority === 'high'
-                    ? 'bg-orange-100 text-orange-800'
-                    : 'bg-slate-100 text-slate-800'
-                }`}>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Priority</label>
+                <span
+                  className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${
+                    task.priority === 'critical'
+                      ? 'bg-red-100 text-red-800'
+                      : task.priority === 'high'
+                        ? 'bg-orange-100 text-orange-800'
+                        : 'bg-slate-100 text-slate-800'
+                  }`}
+                >
                   {task.priority}
                 </span>
               </div>
@@ -101,18 +101,14 @@ export function TaskPanel({ task, onClose }: TaskPanelProps) {
                         className="w-8 h-8 rounded-full"
                       />
                     )}
-                    <span className="text-sm text-slate-700">
-                      {task.assigned_to.full_name}
-                    </span>
+                    <span className="text-sm text-slate-700">{task.assigned_to.full_name}</span>
                   </div>
                 </div>
               )}
 
               {task.due_date && (
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">
-                    Due Date
-                  </label>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Due Date</label>
                   <p className="text-sm text-slate-600">
                     {new Date(task.due_date).toLocaleDateString()}
                   </p>
@@ -139,9 +135,7 @@ export function TaskPanel({ task, onClose }: TaskPanelProps) {
               {commentsLoading ? (
                 <div className="text-center py-4 text-slate-500">Loading...</div>
               ) : comments.length === 0 ? (
-                <div className="text-center py-4 text-slate-500 text-sm">
-                  No comments yet
-                </div>
+                <div className="text-center py-4 text-slate-500 text-sm">No comments yet</div>
               ) : (
                 comments.map((comment) => (
                   <div key={comment.id} className="bg-white p-3 rounded-lg">
@@ -157,9 +151,7 @@ export function TaskPanel({ task, onClose }: TaskPanelProps) {
                         {comment.author?.full_name || 'Unknown'}
                       </span>
                     </div>
-                    <p className="text-sm text-slate-600 whitespace-pre-wrap">
-                      {comment.content}
-                    </p>
+                    <p className="text-sm text-slate-600 whitespace-pre-wrap">{comment.content}</p>
                     <p className="text-xs text-slate-400 mt-1">
                       {new Date(comment.created_at).toLocaleDateString()}
                     </p>

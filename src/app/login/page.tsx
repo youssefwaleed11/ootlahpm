@@ -53,12 +53,8 @@ export default function LoginPage() {
 
         {/* Card */}
         <div className="bg-white rounded-lg shadow-xl p-8">
-          <h1 className="text-3xl font-bold text-slate-900 text-center mb-2">
-            Ootlah PM
-          </h1>
-          <p className="text-center text-slate-500 mb-8">
-            Sign in to your account
-          </p>
+          <h1 className="text-3xl font-bold text-slate-900 text-center mb-2">Ootlah PM</h1>
+          <p className="text-center text-slate-500 mb-8">Sign in to your account</p>
 
           {/* Error Message */}
           {error && (
@@ -119,7 +115,8 @@ export default function LoginPage() {
 
           {/* Footer */}
           <div className="mt-6 pt-6 border-t border-slate-200 text-center text-sm text-slate-500">
-            Don't have an account? <span className="text-slate-700">Contact your administrator</span>
+            Don&apos;t have an account?{' '}
+            <span className="text-slate-700">Contact your administrator</span>
           </div>
         </div>
       </div>

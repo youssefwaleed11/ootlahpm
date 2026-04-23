@@ -13,7 +13,7 @@ export default function KanbanBoardPage() {
   const [chatTaskOpen, setChatTaskOpen] = useState(false);
   const [tasks, setTasks] = useState<Task[]>(MOCK_TASKS);
 
-  const projectTasks = tasks.filter(t => t.projectId === selectedProjectId);
+  const projectTasks = tasks.filter((t) => t.projectId === selectedProjectId);
 
   const handleTaskClick = (task: Task) => {
     setSelectedTask(task);
@@ -22,15 +22,19 @@ export default function KanbanBoardPage() {
 
   const handleTaskUpdate = (updatedTask: Task) => {
     // BACKEND INTEGRATION: Supabase update task + trigger real-time notification
-    setTasks(prev => prev.map(t => t.id === updatedTask.id ? updatedTask : t));
+    setTasks((prev) => prev.map((t) => (t.id === updatedTask.id ? updatedTask : t)));
     setSelectedTask(updatedTask);
   };
 
   const handleStatusChange = (taskId: string, newStatus: Task['status']) => {
     // BACKEND INTEGRATION: Supabase update task status + send Resend email if assigned user
-    setTasks(prev => prev.map(t => t.id === taskId ? { ...t, status: newStatus, updatedAt: new Date().toISOString() } : t));
+    setTasks((prev) =>
+      prev.map((t) =>
+        t.id === taskId ? { ...t, status: newStatus, updatedAt: new Date().toISOString() } : t
+      )
+    );
     if (selectedTask?.id === taskId) {
-      setSelectedTask(prev => prev ? { ...prev, status: newStatus } : null);
+      setSelectedTask((prev) => (prev ? { ...prev, status: newStatus } : null));
     }
   };
 
@@ -45,11 +49,13 @@ export default function KanbanBoardPage() {
         <KanbanHeader
           selectedProjectId={selectedProjectId}
           onProjectChange={setSelectedProjectId}
-          projects={MOCK_PROJECTS.filter(p => p.status !== 'archived')}
+          projects={MOCK_PROJECTS.filter((p) => p.status !== 'archived')}
         />
         <div className="flex flex-1 overflow-hidden">
           {/* Kanban board */}
-          <div className={`flex-1 overflow-hidden transition-all duration-300 ${selectedTask ? 'lg:mr-0' : ''}`}>
+          <div
+            className={`flex-1 overflow-hidden transition-all duration-300 ${selectedTask ? 'lg:mr-0' : ''}`}
+          >
             <KanbanColumns
               tasks={projectTasks}
               onTaskClick={handleTaskClick}
@@ -69,10 +75,7 @@ export default function KanbanBoardPage() {
                 chatOpen={chatTaskOpen}
               />
               {chatTaskOpen && (
-                <TaskChatPanel
-                  task={selectedTask}
-                  onClose={() => setChatTaskOpen(false)}
-                />
+                <TaskChatPanel task={selectedTask} onClose={() => setChatTaskOpen(false)} />
               )}
             </div>
           )}

@@ -27,7 +27,7 @@ export default function SettingsPage() {
   const applyTheme = (newTheme: 'light' | 'dark' | 'auto') => {
     const html = document.documentElement;
     localStorage.setItem('theme', newTheme);
-    
+
     if (newTheme === 'dark') {
       html.classList.add('dark');
       document.body.style.backgroundColor = '#0f172a';
@@ -67,7 +67,9 @@ export default function SettingsPage() {
 
         {/* Account Settings */}
         <div className="bg-white rounded-xl border border-slate-200 p-6">
-          <h2 className="text-lg font-700 text-slate-900 mb-6 pb-4 border-b border-slate-200">Account Information</h2>
+          <h2 className="text-lg font-700 text-slate-900 mb-6 pb-4 border-b border-slate-200">
+            Account Information
+          </h2>
 
           <div className="space-y-6">
             {/* Profile Picture */}
@@ -119,7 +121,9 @@ export default function SettingsPage() {
 
         {/* Theme Preferences */}
         <div className="bg-white rounded-xl border border-slate-200 p-6">
-          <h2 className="text-lg font-700 text-slate-900 mb-6 pb-4 border-b border-slate-200">Appearance</h2>
+          <h2 className="text-lg font-700 text-slate-900 mb-6 pb-4 border-b border-slate-200">
+            Appearance
+          </h2>
 
           <div>
             <label className="block text-sm font-600 text-slate-900 mb-3">Theme</label>
@@ -128,8 +132,11 @@ export default function SettingsPage() {
                 { id: 'light', label: 'Light', icon: 'SunIcon' },
                 { id: 'dark', label: 'Dark', icon: 'MoonIcon' },
                 { id: 'auto', label: 'Auto (System)', icon: 'ComputerDesktopIcon' },
-              ].map(option => (
-                <label key={option.id} className="flex items-center gap-3 p-3 border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50 transition-colors">
+              ].map((option) => (
+                <label
+                  key={option.id}
+                  className="flex items-center gap-3 p-3 border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50 transition-colors"
+                >
                   <input
                     type="radio"
                     name="theme"
@@ -148,30 +155,60 @@ export default function SettingsPage() {
 
         {/* Notification Preferences */}
         <div className="bg-white rounded-xl border border-slate-200 p-6">
-          <h2 className="text-lg font-700 text-slate-900 mb-6 pb-4 border-b border-slate-200">Notifications</h2>
+          <h2 className="text-lg font-700 text-slate-900 mb-6 pb-4 border-b border-slate-200">
+            Notifications
+          </h2>
 
           <div className="space-y-4">
             {[
               { key: 'email', label: 'Email Notifications', desc: 'Receive updates via email' },
-              { key: 'desktop', label: 'Desktop Notifications', desc: 'Receive browser notifications' },
-              { key: 'taskAssigned', label: 'Task Assigned to Me', desc: 'Get notified when tasks are assigned' },
-              { key: 'taskCompleted', label: 'Task Completed', desc: 'Get notified when related tasks are completed' },
-              { key: 'dailyDigest', label: 'Daily Digest', desc: 'Receive a daily summary of activities' },
-            ].map(setting => (
-              <div key={setting.key} className="flex items-start justify-between p-4 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors">
+              {
+                key: 'desktop',
+                label: 'Desktop Notifications',
+                desc: 'Receive browser notifications',
+              },
+              {
+                key: 'taskAssigned',
+                label: 'Task Assigned to Me',
+                desc: 'Get notified when tasks are assigned',
+              },
+              {
+                key: 'taskCompleted',
+                label: 'Task Completed',
+                desc: 'Get notified when related tasks are completed',
+              },
+              {
+                key: 'dailyDigest',
+                label: 'Daily Digest',
+                desc: 'Receive a daily summary of activities',
+              },
+            ].map((setting) => (
+              <div
+                key={setting.key}
+                className="flex items-start justify-between p-4 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
+              >
                 <div>
                   <p className="font-600 text-slate-900">{setting.label}</p>
                   <p className="text-sm text-slate-600">{setting.desc}</p>
                 </div>
                 <button
-                  onClick={() => setNotifications(prev => ({ ...prev, [setting.key]: !prev[setting.key as keyof typeof notifications] }))}
+                  onClick={() =>
+                    setNotifications((prev) => ({
+                      ...prev,
+                      [setting.key]: !prev[setting.key as keyof typeof notifications],
+                    }))
+                  }
                   className={`relative w-12 h-7 rounded-full transition-colors ${
-                    notifications[setting.key as keyof typeof notifications] ? 'bg-red-600' : 'bg-slate-300'
+                    notifications[setting.key as keyof typeof notifications]
+                      ? 'bg-red-600'
+                      : 'bg-slate-300'
                   }`}
                 >
                   <div
                     className={`absolute top-0.5 w-6 h-6 bg-white rounded-full transition-transform ${
-                      notifications[setting.key as keyof typeof notifications] ? 'translate-x-5' : 'translate-x-0.5'
+                      notifications[setting.key as keyof typeof notifications]
+                        ? 'translate-x-5'
+                        : 'translate-x-0.5'
                     }`}
                   />
                 </button>

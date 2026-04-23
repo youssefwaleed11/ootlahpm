@@ -1,135 +1,81 @@
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
-import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
+import { requireRole, isSession, getUserDepartmentIds } from '@/lib/auth/session';
+import type { UserRole } from '@/types/database';
 
 export async function GET(request: NextRequest) {
-  try {
-    const supabase = createServerComponentClient({ cookies });
-    
-    // Get authenticated user
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+  const session = await requireRole('admin', 'team_leader');
+  if (!isSession(session)) return session;
 
-    // Get user's organization
-    const { data: userData } = await supabase
-      .from('users')
-      .select('organization_id, role')
-      .eq('id', user.id)
-      .single();
+  const { searchParams } = new URL(request.url);
+  const role = searchParams.get('role') as UserRole | null;
+  const departmentId = searchParams.get('departmentId');
+  const search = searchParams.get('search');
+  const page = Math.max(1, Number(searchParams.get('page') ?? 1));
+  const limit = Math.min(100, Number(searchParams.get('limit') ?? 20));
+  const from = (page - 1) * limit;
+  const to = from + limit - 1;
 
-    if (!userData) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 });
-    }
+  let q = session.supabase
+    .from('users')
+    .select('id, email, full_name, avatar_url, role, is_active, position, created_at', {
+      count: 'exact',
+    })
+    .eq('organization_id', session.user.organization_id)
+    .order('created_at', { ascending: false })
+    .range(from, to);
 
-    // Build query based on user role
-    let query = supabase
-      .from('users')
-      .select('id, email, full_name, avatar_url, role, created_at')
-      .eq('organization_id', userData.organization_id);
+  if (role) q = q.eq('role', role);
+  if (search) q = q.or(`email.ilike.%${search}%,full_name.ilike.%${search}%`);
 
-    // Non-admins can only see users in their departments
-    if (userData.role !== 'admin') {
-      const { data: departments } = await supabase
-        .from('department_members')
-        .select('department_id')
-        .eq('user_id', user.id);
-
-      const deptIds = departments?.map(d => d.department_id) || [];
-      
-      const { data: users } = await supabase
-        .from('users')
-        .select('id, email, full_name, avatar_url, role, created_at')
-        .eq('organization_id', userData.organization_id)
-        .in('id', 
-          (await supabase
-            .from('department_members')
-            .select('user_id')
-            .in('department_id', deptIds)
-            .then(r => r.data?.map(d => d.user_id) || [])
-          )
-        );
-
-      return NextResponse.json({ users });
-    }
-
-    const { data: users, error } = await query;
-
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
-    }
-
-    return NextResponse.json({ users });
-  } catch (error) {
-    console.error('Error fetching users:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
-  }
-}
-
-export async function POST(request: NextRequest) {
-  try {
-    const supabase = createServerComponentClient({ cookies });
-    
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    // Check if user is admin
-    const { data: userData } = await supabase
-      .from('users')
-      .select('role, organization_id')
-      .eq('id', user.id)
-      .single();
-
-    if (userData?.role !== 'admin') {
-      return NextResponse.json({ error: 'Only admins can create users' }, { status: 403 });
-    }
-
-    const { email, fullName, departmentId, role = 'team_member' } = await request.json();
-
-    // Create user in auth
-    const { data: authData, error: authError } = await supabase.auth.admin.createUser({
-      email,
-      password: Math.random().toString(36).slice(-12), // Temporary password
-      email_confirm: true,
-    });
-
-    if (authError) {
-      return NextResponse.json({ error: authError.message }, { status: 400 });
-    }
-
-    // Create user profile
-    const { data: newUser, error: userError } = await supabase
-      .from('users')
-      .insert({
-        id: authData.user.id,
-        email,
-        full_name: fullName,
-        organization_id: userData.organization_id,
-        role,
-      })
-      .select()
-      .single();
-
-    if (userError) {
-      await supabase.auth.admin.deleteUser(authData.user.id);
-      return NextResponse.json({ error: 'Failed to create user' }, { status: 500 });
-    }
-
-    // Add to department if specified
-    if (departmentId) {
-      await supabase.from('department_members').insert({
-        user_id: authData.user.id,
-        department_id: departmentId,
-        role: 'team_member',
+  if (session.user.role === 'team_leader') {
+    const deptIds = await getUserDepartmentIds(session);
+    if (deptIds.length === 0) {
+      return NextResponse.json({
+        users: [],
+        pagination: { total: 0, page, limit, hasMore: false },
       });
     }
-
-    return NextResponse.json(newUser, { status: 201 });
-  } catch (error) {
-    console.error('Error creating user:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    const { data: members } = await session.supabase
+      .from('department_members')
+      .select('user_id')
+      .in('department_id', deptIds);
+    const memberIds = Array.from(new Set((members ?? []).map((m) => m.user_id as string)));
+    if (memberIds.length === 0) {
+      return NextResponse.json({
+        users: [],
+        pagination: { total: 0, page, limit, hasMore: false },
+      });
+    }
+    q = q.in('id', memberIds);
+    if (departmentId && !deptIds.includes(departmentId)) {
+      return NextResponse.json({
+        users: [],
+        pagination: { total: 0, page, limit, hasMore: false },
+      });
+    }
   }
+
+  if (departmentId) {
+    const { data: members } = await session.supabase
+      .from('department_members')
+      .select('user_id')
+      .eq('department_id', departmentId);
+    const ids = (members ?? []).map((m) => m.user_id as string);
+    if (ids.length === 0) {
+      return NextResponse.json({
+        users: [],
+        pagination: { total: 0, page, limit, hasMore: false },
+      });
+    }
+    q = q.in('id', ids);
+  }
+
+  const { data: users, error, count } = await q;
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+  const total = count ?? users?.length ?? 0;
+  return NextResponse.json({
+    users: users ?? [],
+    pagination: { total, page, limit, hasMore: from + (users?.length ?? 0) < total },
+  });
 }

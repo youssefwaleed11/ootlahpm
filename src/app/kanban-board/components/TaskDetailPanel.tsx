@@ -1,7 +1,14 @@
 'use client';
 import React, { useState } from 'react';
 import Icon from '@/components/ui/AppIcon';
-import { getUserById, getTeamById, formatDate, isOverdue, MOCK_USERS, type Task } from '@/lib/mockData';
+import {
+  getUserById,
+  getTeamById,
+  formatDate,
+  isOverdue,
+  MOCK_USERS,
+  type Task,
+} from '@/lib/mockData';
 import { toast } from 'sonner';
 
 interface TaskDetailPanelProps {
@@ -26,7 +33,13 @@ const STATUS_CONFIG = {
   done: { label: 'Done', className: 'bg-emerald-100 text-emerald-700' },
 };
 
-export default function TaskDetailPanel({ task, onClose, onUpdate, onOpenChat, chatOpen }: TaskDetailPanelProps) {
+export default function TaskDetailPanel({
+  task,
+  onClose,
+  onUpdate,
+  onOpenChat,
+  chatOpen,
+}: TaskDetailPanelProps) {
   const [editingTitle, setEditingTitle] = useState(false);
   const [editingDesc, setEditingDesc] = useState(false);
   const [titleValue, setTitleValue] = useState(task.title);
@@ -79,9 +92,13 @@ export default function TaskDetailPanel({ task, onClose, onUpdate, onOpenChat, c
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-slate-200 flex-shrink-0">
         <div className="flex items-center gap-2">
-          <span className="text-[11px] font-600 text-slate-400 font-mono">#{task.id.split('-')[1]}</span>
-          <span className={`text-[11px] font-600 px-2 py-0.5 rounded-full ${overdue ? 'bg-red-100 text-red-600' : 'bg-slate-100 text-slate-500'}`}>
-            {overdue ? '⚠ Overdue' : 'On track'}
+          <span className="text-[11px] font-600 text-slate-400 font-mono">
+            #{task.id.split('-')[1]}
+          </span>
+          <span
+            className={`text-[11px] font-600 px-2 py-0.5 rounded-full ${overdue ? 'bg-red-100 text-red-600' : 'bg-slate-100 text-slate-500'}`}
+          >
+            {overdue ? 'Overdue' : 'On track'}
           </span>
         </div>
         <div className="flex items-center gap-1">
@@ -95,7 +112,10 @@ export default function TaskDetailPanel({ task, onClose, onUpdate, onOpenChat, c
           <button className="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors">
             <Icon name="EllipsisHorizontalIcon" size={16} />
           </button>
-          <button onClick={onClose} className="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors">
+          <button
+            onClick={onClose}
+            className="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors"
+          >
             <Icon name="XMarkIcon" size={16} />
           </button>
         </div>
@@ -111,9 +131,12 @@ export default function TaskDetailPanel({ task, onClose, onUpdate, onOpenChat, c
                 <input
                   autoFocus
                   value={titleValue}
-                  onChange={e => setTitleValue(e.target.value)}
+                  onChange={(e) => setTitleValue(e.target.value)}
                   onBlur={handleTitleSave}
-                  onKeyDown={e => { if (e.key === 'Enter') handleTitleSave(); if (e.key === 'Escape') setEditingTitle(false); }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') handleTitleSave();
+                    if (e.key === 'Escape') setEditingTitle(false);
+                  }}
                   className="w-full text-base font-700 text-slate-800 bg-slate-50 border border-brand-orange/50 rounded-lg px-2 py-1 focus:outline-none focus:ring-2 focus:ring-brand-orange/30"
                 />
               </div>
@@ -123,7 +146,11 @@ export default function TaskDetailPanel({ task, onClose, onUpdate, onOpenChat, c
                 className="text-base font-700 text-slate-800 leading-snug cursor-text hover:text-brand-orange transition-colors duration-150 group"
               >
                 {task.title}
-                <Icon name="PencilSquareIcon" size={12} className="inline ml-1 text-slate-300 group-hover:text-brand-orange/60 transition-colors" />
+                <Icon
+                  name="PencilSquareIcon"
+                  size={12}
+                  className="inline ml-1 text-slate-300 group-hover:text-brand-orange/60 transition-colors"
+                />
               </h2>
             )}
           </div>
@@ -132,7 +159,9 @@ export default function TaskDetailPanel({ task, onClose, onUpdate, onOpenChat, c
           <div className="grid grid-cols-2 gap-2">
             {/* Status */}
             <div className="relative">
-              <p className="text-[10px] font-600 text-slate-400 uppercase tracking-wider mb-1">Status</p>
+              <p className="text-[10px] font-600 text-slate-400 uppercase tracking-wider mb-1">
+                Status
+              </p>
               <button
                 onClick={() => setStatusDropOpen(!statusDropOpen)}
                 className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs font-600 border border-transparent hover:border-slate-200 transition-all duration-150 ${STATUS_CONFIG[task.status].className}`}
@@ -142,7 +171,7 @@ export default function TaskDetailPanel({ task, onClose, onUpdate, onOpenChat, c
               </button>
               {statusDropOpen && (
                 <div className="absolute top-full left-0 mt-1 w-full bg-white rounded-lg border border-slate-200 shadow-card z-20 overflow-hidden fade-in">
-                  {(Object.keys(STATUS_CONFIG) as Task['status'][]).map(s => (
+                  {(Object.keys(STATUS_CONFIG) as Task['status'][]).map((s) => (
                     <button
                       key={`status-opt-${s}`}
                       onClick={() => handleStatusChange(s)}
@@ -157,7 +186,9 @@ export default function TaskDetailPanel({ task, onClose, onUpdate, onOpenChat, c
 
             {/* Priority */}
             <div className="relative">
-              <p className="text-[10px] font-600 text-slate-400 uppercase tracking-wider mb-1">Priority</p>
+              <p className="text-[10px] font-600 text-slate-400 uppercase tracking-wider mb-1">
+                Priority
+              </p>
               <button
                 onClick={() => setPriorityDropOpen(!priorityDropOpen)}
                 className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs font-600 border border-transparent hover:border-slate-200 transition-all duration-150 ${PRIORITY_CONFIG[task.priority].className}`}
@@ -167,7 +198,7 @@ export default function TaskDetailPanel({ task, onClose, onUpdate, onOpenChat, c
               </button>
               {priorityDropOpen && (
                 <div className="absolute top-full left-0 mt-1 w-full bg-white rounded-lg border border-slate-200 shadow-card z-20 overflow-hidden fade-in">
-                  {(Object.keys(PRIORITY_CONFIG) as Task['priority'][]).map(p => (
+                  {(Object.keys(PRIORITY_CONFIG) as Task['priority'][]).map((p) => (
                     <button
                       key={`prio-opt-${p}`}
                       onClick={() => handlePriorityChange(p)}
@@ -183,7 +214,9 @@ export default function TaskDetailPanel({ task, onClose, onUpdate, onOpenChat, c
 
           {/* Assignee */}
           <div className="relative">
-            <p className="text-[10px] font-600 text-slate-400 uppercase tracking-wider mb-1.5">Assignee</p>
+            <p className="text-[10px] font-600 text-slate-400 uppercase tracking-wider mb-1.5">
+              Assignee
+            </p>
             <button
               onClick={() => setAssigneeDropOpen(!assigneeDropOpen)}
               className="w-full flex items-center gap-2.5 px-3 py-2 bg-slate-50 rounded-lg border border-slate-200 hover:border-brand-orange/40 transition-all duration-150 group"
@@ -195,7 +228,9 @@ export default function TaskDetailPanel({ task, onClose, onUpdate, onOpenChat, c
                   </div>
                   <div className="flex-1 text-left">
                     <p className="text-xs font-600 text-slate-700">{assignee.name}</p>
-                    <p className="text-[10px] text-slate-400 capitalize">{assignee.role.replace('_', ' ')}</p>
+                    <p className="text-[10px] text-slate-400 capitalize">
+                      {assignee.role.replace('_', ' ')}
+                    </p>
                   </div>
                 </>
               ) : (
@@ -211,9 +246,11 @@ export default function TaskDetailPanel({ task, onClose, onUpdate, onOpenChat, c
             {assigneeDropOpen && (
               <div className="absolute top-full left-0 mt-1 w-full bg-white rounded-xl border border-slate-200 shadow-modal z-20 overflow-hidden fade-in">
                 <div className="px-3 py-2 border-b border-slate-100">
-                  <p className="text-[10px] font-600 text-slate-500 uppercase tracking-wider">Assign to</p>
+                  <p className="text-[10px] font-600 text-slate-500 uppercase tracking-wider">
+                    Assign to
+                  </p>
                 </div>
-                {MOCK_USERS.map(user => (
+                {MOCK_USERS.map((user) => (
                   <button
                     key={`assign-${user.id}`}
                     onClick={() => handleAssigneeChange(user.id)}
@@ -224,10 +261,20 @@ export default function TaskDetailPanel({ task, onClose, onUpdate, onOpenChat, c
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-xs font-600 text-slate-700 truncate">{user.name}</p>
-                      <p className="text-[10px] text-slate-400 capitalize">{user.role.replace('_', ' ')}</p>
+                      <p className="text-[10px] text-slate-400 capitalize">
+                        {user.role.replace('_', ' ')}
+                      </p>
                     </div>
-                    {user.isOnline && <span className="w-2 h-2 rounded-full bg-emerald-500 flex-shrink-0" />}
-                    {task.assigneeId === user.id && <Icon name="CheckIcon" size={12} className="text-brand-orange flex-shrink-0" />}
+                    {user.isOnline && (
+                      <span className="w-2 h-2 rounded-full bg-emerald-500 flex-shrink-0" />
+                    )}
+                    {task.assigneeId === user.id && (
+                      <Icon
+                        name="CheckIcon"
+                        size={12}
+                        className="text-brand-orange flex-shrink-0"
+                      />
+                    )}
                   </button>
                 ))}
               </div>
@@ -237,17 +284,33 @@ export default function TaskDetailPanel({ task, onClose, onUpdate, onOpenChat, c
           {/* Dates */}
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <p className="text-[10px] font-600 text-slate-400 uppercase tracking-wider mb-1.5">Start Date</p>
+              <p className="text-[10px] font-600 text-slate-400 uppercase tracking-wider mb-1.5">
+                Start Date
+              </p>
               <div className="flex items-center gap-1.5 px-2.5 py-1.5 bg-slate-50 rounded-lg border border-slate-200">
                 <Icon name="CalendarIcon" size={12} className="text-slate-400" />
-                <span className="text-xs text-slate-600 font-tabular">{formatDate(task.startDate)}</span>
+                <span className="text-xs text-slate-600 font-tabular">
+                  {formatDate(task.startDate)}
+                </span>
               </div>
             </div>
             <div>
-              <p className="text-[10px] font-600 text-slate-400 uppercase tracking-wider mb-1.5">Due Date</p>
-              <div className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border ${overdue ? 'bg-red-50 border-red-200' : 'bg-slate-50 border-slate-200'}`}>
-                <Icon name="CalendarDaysIcon" size={12} className={overdue ? 'text-red-400' : 'text-slate-400'} />
-                <span className={`text-xs font-tabular ${overdue ? 'text-red-600 font-600' : 'text-slate-600'}`}>{formatDate(task.dueDate)}</span>
+              <p className="text-[10px] font-600 text-slate-400 uppercase tracking-wider mb-1.5">
+                Due Date
+              </p>
+              <div
+                className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border ${overdue ? 'bg-red-50 border-red-200' : 'bg-slate-50 border-slate-200'}`}
+              >
+                <Icon
+                  name="CalendarDaysIcon"
+                  size={12}
+                  className={overdue ? 'text-red-400' : 'text-slate-400'}
+                />
+                <span
+                  className={`text-xs font-tabular ${overdue ? 'text-red-600 font-600' : 'text-slate-600'}`}
+                >
+                  {formatDate(task.dueDate)}
+                </span>
               </div>
             </div>
           </div>
@@ -255,9 +318,14 @@ export default function TaskDetailPanel({ task, onClose, onUpdate, onOpenChat, c
           {/* Team */}
           {team && (
             <div>
-              <p className="text-[10px] font-600 text-slate-400 uppercase tracking-wider mb-1.5">Team</p>
+              <p className="text-[10px] font-600 text-slate-400 uppercase tracking-wider mb-1.5">
+                Team
+              </p>
               <div className="flex items-center gap-2 px-3 py-2 bg-slate-50 rounded-lg border border-slate-200">
-                <div className="w-5 h-5 rounded-md flex items-center justify-center" style={{ background: team.color }}>
+                <div
+                  className="w-5 h-5 rounded-md flex items-center justify-center"
+                  style={{ background: team.color }}
+                >
                   <Icon name="UserGroupIcon" size={10} className="text-white" />
                 </div>
                 <span className="text-xs font-600 text-slate-700">{team.name}</span>
@@ -268,10 +336,15 @@ export default function TaskDetailPanel({ task, onClose, onUpdate, onOpenChat, c
           {/* Tags */}
           {task.tags.length > 0 && (
             <div>
-              <p className="text-[10px] font-600 text-slate-400 uppercase tracking-wider mb-1.5">Tags</p>
+              <p className="text-[10px] font-600 text-slate-400 uppercase tracking-wider mb-1.5">
+                Tags
+              </p>
               <div className="flex flex-wrap gap-1.5">
-                {task.tags.map(tag => (
-                  <span key={`detail-tag-${task.id}-${tag}`} className="text-[11px] font-500 px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200">
+                {task.tags.map((tag) => (
+                  <span
+                    key={`detail-tag-${task.id}-${tag}`}
+                    className="text-[11px] font-500 px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200"
+                  >
                     {tag}
                   </span>
                 ))}
@@ -281,13 +354,15 @@ export default function TaskDetailPanel({ task, onClose, onUpdate, onOpenChat, c
 
           {/* Description */}
           <div>
-            <p className="text-[10px] font-600 text-slate-400 uppercase tracking-wider mb-1.5">Description</p>
+            <p className="text-[10px] font-600 text-slate-400 uppercase tracking-wider mb-1.5">
+              Description
+            </p>
             {editingDesc ? (
               <div>
                 <textarea
                   autoFocus
                   value={descValue}
-                  onChange={e => setDescValue(e.target.value)}
+                  onChange={(e) => setDescValue(e.target.value)}
                   rows={4}
                   className="w-full text-sm text-slate-700 bg-slate-50 border border-brand-orange/50 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-orange/30 resize-none scrollbar-thin"
                 />
@@ -299,7 +374,10 @@ export default function TaskDetailPanel({ task, onClose, onUpdate, onOpenChat, c
                     Save
                   </button>
                   <button
-                    onClick={() => { setDescValue(task.description); setEditingDesc(false); }}
+                    onClick={() => {
+                      setDescValue(task.description);
+                      setEditingDesc(false);
+                    }}
                     className="px-3 py-1 bg-slate-100 text-slate-600 text-xs font-600 rounded-lg hover:bg-slate-200 transition-colors"
                   >
                     Cancel
@@ -311,15 +389,23 @@ export default function TaskDetailPanel({ task, onClose, onUpdate, onOpenChat, c
                 onClick={() => setEditingDesc(true)}
                 className="text-sm text-slate-600 leading-relaxed cursor-text hover:bg-slate-50 rounded-lg p-2 -mx-2 transition-colors duration-150 group"
               >
-                {task.description || <span className="text-slate-400 italic">Add a description...</span>}
-                <Icon name="PencilSquareIcon" size={10} className="inline ml-1 text-slate-300 group-hover:text-brand-orange/60 transition-colors" />
+                {task.description || (
+                  <span className="text-slate-400 italic">Add a description...</span>
+                )}
+                <Icon
+                  name="PencilSquareIcon"
+                  size={10}
+                  className="inline ml-1 text-slate-300 group-hover:text-brand-orange/60 transition-colors"
+                />
               </div>
             )}
           </div>
 
           {/* Reporter */}
           <div>
-            <p className="text-[10px] font-600 text-slate-400 uppercase tracking-wider mb-1.5">Reporter</p>
+            <p className="text-[10px] font-600 text-slate-400 uppercase tracking-wider mb-1.5">
+              Reporter
+            </p>
             <div className="flex items-center gap-2">
               <div className="w-6 h-6 rounded-full bg-brand-orange flex items-center justify-center">
                 <span className="text-white text-[10px] font-700">{reporter?.avatar}</span>

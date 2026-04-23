@@ -1,7 +1,14 @@
 'use client';
 import React, { useState, useRef, useEffect } from 'react';
 import Icon from '@/components/ui/AppIcon';
-import { MOCK_TEAMS, MOCK_USERS, CURRENT_USER, getMessagesByChannel, getUserById, timeAgo } from '@/lib/mockData';
+import {
+  MOCK_TEAMS,
+  MOCK_USERS,
+  CURRENT_USER,
+  getMessagesByChannel,
+  getUserById,
+  timeAgo,
+} from '@/lib/mockData';
 import type { Message } from '@/lib/mockData';
 
 interface GlobalChatSidebarProps {
@@ -34,7 +41,7 @@ export default function GlobalChatSidebar({ open, onClose }: GlobalChatSidebarPr
       createdAt: new Date().toISOString(),
       isRead: true,
     };
-    setMessages(prev => [...prev, newMsg]);
+    setMessages((prev) => [...prev, newMsg]);
     setInput('');
   };
 
@@ -45,7 +52,7 @@ export default function GlobalChatSidebar({ open, onClose }: GlobalChatSidebarPr
     }
   };
 
-  const onlineUsers = MOCK_USERS.filter(u => u.isOnline);
+  const onlineUsers = MOCK_USERS.filter((u) => u.isOnline);
 
   return (
     <div
@@ -61,22 +68,26 @@ export default function GlobalChatSidebar({ open, onClose }: GlobalChatSidebarPr
             {onlineUsers.length} online
           </span>
         </div>
-        <button onClick={onClose} className="p-1 rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors">
+        <button
+          onClick={onClose}
+          className="p-1 rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors"
+        >
           <Icon name="XMarkIcon" size={16} />
         </button>
       </div>
 
       {/* Channel tabs */}
       <div className="flex border-b border-slate-200 flex-shrink-0">
-        {MOCK_TEAMS.map(team => {
-          const unread = getMessagesByChannel(team.id).filter(m => !m.isRead).length;
+        {MOCK_TEAMS.map((team) => {
+          const unread = getMessagesByChannel(team.id).filter((m) => !m.isRead).length;
           return (
             <button
               key={`chan-${team.id}`}
               onClick={() => setActiveChannel(team.id)}
               className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-500 border-b-2 transition-colors duration-150 ${
                 activeChannel === team.id
-                  ? 'border-brand-orange text-brand-orange' :'border-transparent text-slate-500 hover:text-slate-700'
+                  ? 'border-brand-orange text-brand-orange'
+                  : 'border-transparent text-slate-500 hover:text-slate-700'
               }`}
             >
               <span className="truncate">{team.name.split(' ')[0]}</span>
@@ -93,16 +104,18 @@ export default function GlobalChatSidebar({ open, onClose }: GlobalChatSidebarPr
       {/* Online members */}
       <div className="px-3 py-2 border-b border-slate-100 flex-shrink-0">
         <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-thin pb-1">
-          {MOCK_USERS.filter(u => u.teamId === activeChannel || u.isOnline).slice(0, 8).map(user => (
-            <div key={`online-${user.id}`} className="relative flex-shrink-0" title={user.name}>
-              <div className="w-7 h-7 rounded-full bg-brand-orange/80 flex items-center justify-center">
-                <span className="text-white text-[10px] font-700">{user.avatar}</span>
+          {MOCK_USERS.filter((u) => u.teamId === activeChannel || u.isOnline)
+            .slice(0, 8)
+            .map((user) => (
+              <div key={`online-${user.id}`} className="relative flex-shrink-0" title={user.name}>
+                <div className="w-7 h-7 rounded-full bg-brand-orange/80 flex items-center justify-center">
+                  <span className="text-white text-[10px] font-700">{user.avatar}</span>
+                </div>
+                {user.isOnline && (
+                  <span className="absolute bottom-0 right-0 w-2 h-2 rounded-full bg-emerald-500 border border-white" />
+                )}
               </div>
-              {user.isOnline && (
-                <span className="absolute bottom-0 right-0 w-2 h-2 rounded-full bg-emerald-500 border border-white" />
-              )}
-            </div>
-          ))}
+            ))}
         </div>
       </div>
 
@@ -132,15 +145,22 @@ export default function GlobalChatSidebar({ open, onClose }: GlobalChatSidebarPr
                 ) : null}
                 <div className={`max-w-[80%] ${isMe ? 'items-end' : 'items-start'} flex flex-col`}>
                   {showAvatar && !isMe && (
-                    <span className="text-[10px] text-slate-500 font-500 mb-0.5 px-1">{user?.name.split(' ')[0]}</span>
+                    <span className="text-[10px] text-slate-500 font-500 mb-0.5 px-1">
+                      {user?.name.split(' ')[0]}
+                    </span>
                   )}
-                  <div className={`px-3 py-2 rounded-xl text-xs leading-relaxed ${
-                    isMe
-                      ? 'bg-brand-orange text-white rounded-tr-sm' :'bg-slate-100 text-slate-800 rounded-tl-sm'
-                  }`}>
+                  <div
+                    className={`px-3 py-2 rounded-xl text-xs leading-relaxed ${
+                      isMe
+                        ? 'bg-brand-orange text-white rounded-tr-sm'
+                        : 'bg-slate-100 text-slate-800 rounded-tl-sm'
+                    }`}
+                  >
                     {msg.content}
                   </div>
-                  <span className="text-[9px] text-slate-400 mt-0.5 px-1">{timeAgo(msg.createdAt)}</span>
+                  <span className="text-[9px] text-slate-400 mt-0.5 px-1">
+                    {timeAgo(msg.createdAt)}
+                  </span>
                 </div>
               </div>
             );
@@ -154,7 +174,7 @@ export default function GlobalChatSidebar({ open, onClose }: GlobalChatSidebarPr
         <div className="flex items-end gap-2 bg-slate-50 rounded-xl border border-slate-200 px-3 py-2 focus-within:ring-2 focus-within:ring-brand-orange/30 focus-within:border-brand-orange transition-all duration-150">
           <textarea
             value={input}
-            onChange={e => setInput(e.target.value)}
+            onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Message your team..."
             rows={1}
@@ -168,7 +188,9 @@ export default function GlobalChatSidebar({ open, onClose }: GlobalChatSidebarPr
             <Icon name="PaperAirplaneIcon" size={14} />
           </button>
         </div>
-        <p className="text-[10px] text-slate-400 mt-1.5 text-center">Enter to send · Shift+Enter for newline</p>
+        <p className="text-[10px] text-slate-400 mt-1.5 text-center">
+          Enter to send · Shift+Enter for newline
+        </p>
       </div>
     </div>
   );

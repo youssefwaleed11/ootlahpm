@@ -33,26 +33,48 @@ export default function DashboardPage() {
       completed: 87,
     },
     tasksByDepartment: {
-      'marketing': 28,
-      'seo': 22,
-      'content': 20,
-      'bd': 18,
-      'designers': 20,
+      marketing: 28,
+      seo: 22,
+      content: 20,
+      bd: 18,
+      designers: 20,
       'social-media': 16,
     },
   });
 
   const [departmentStats] = useState<DepartmentStats[]>([
-    { id: '1', name: 'Marketing', color: '#EF4444', tasksCount: 28, onTimeRate: 92, teamMembers: 4 },
+    {
+      id: '1',
+      name: 'Marketing',
+      color: '#EF4444',
+      tasksCount: 28,
+      onTimeRate: 92,
+      teamMembers: 4,
+    },
     { id: '2', name: 'SEO', color: '#F97316', tasksCount: 22, onTimeRate: 88, teamMembers: 3 },
     { id: '3', name: 'Content', color: '#EAB308', tasksCount: 20, onTimeRate: 95, teamMembers: 5 },
     { id: '4', name: 'BD', color: '#10B981', tasksCount: 18, onTimeRate: 85, teamMembers: 2 },
-    { id: '5', name: 'Designers', color: '#3B82F6', tasksCount: 20, onTimeRate: 90, teamMembers: 3 },
-    { id: '6', name: 'Social Media', color: '#8B5CF6', tasksCount: 16, onTimeRate: 89, teamMembers: 2 },
+    {
+      id: '5',
+      name: 'Designers',
+      color: '#3B82F6',
+      tasksCount: 20,
+      onTimeRate: 90,
+      teamMembers: 3,
+    },
+    {
+      id: '6',
+      name: 'Social Media',
+      color: '#8B5CF6',
+      tasksCount: 16,
+      onTimeRate: 89,
+      teamMembers: 2,
+    },
   ]);
 
   const completionRate = Math.round((stats.completedTasks / stats.totalTasks) * 100);
-  const overallHealth = stats.overdueTasks === 0 ? 'Excellent' : stats.overdueTasks <= 3 ? 'Good' : 'Needs Attention';
+  const overallHealth =
+    stats.overdueTasks === 0 ? 'Excellent' : stats.overdueTasks <= 3 ? 'Good' : 'Needs Attention';
 
   return (
     <AppLayout currentPath="/dashboard">
@@ -60,7 +82,9 @@ export default function DashboardPage() {
         {/* Header */}
         <div>
           <h1 className="text-3xl font-800 text-slate-900 mb-2">Global Dashboard</h1>
-          <p className="text-slate-600">Complete company overview and department performance metrics</p>
+          <p className="text-slate-600">
+            Complete company overview and department performance metrics
+          </p>
         </div>
 
         {/* Key Metrics Grid */}
@@ -122,7 +146,10 @@ export default function DashboardPage() {
           <h2 className="text-lg font-700 text-slate-900 mb-4">Department Performance</h2>
           <div className="space-y-3">
             {departmentStats.map((dept) => (
-              <div key={dept.id} className="flex items-center justify-between p-4 bg-slate-50 rounded-lg border border-slate-200 hover:bg-slate-100 transition-colors">
+              <div
+                key={dept.id}
+                className="flex items-center justify-between p-4 bg-slate-50 rounded-lg border border-slate-200 hover:bg-slate-100 transition-colors"
+              >
                 <div className="flex items-center gap-3 flex-1">
                   <div
                     className="w-3 h-3 rounded-full flex-shrink-0"
@@ -191,7 +218,11 @@ function MetricCard({ label, value, icon, color, trend, subtext, valueClass }: M
     <div className={`${color} rounded-xl border border-slate-200 p-4`}>
       <div className="flex items-start justify-between mb-3">
         <p className="text-xs font-600 text-slate-600 uppercase">{label}</p>
-        <Icon name={icon as Parameters<typeof Icon>[0]['name']} size={18} className="text-slate-600" />
+        <Icon
+          name={icon as Parameters<typeof Icon>[0]['name']}
+          size={18}
+          className="text-slate-600"
+        />
       </div>
       <p className={valueClass || 'text-3xl font-800 text-slate-900'}>{value}</p>
       {subtext && <p className="text-xs text-slate-600 mt-1">{subtext}</p>}

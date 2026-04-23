@@ -15,10 +15,28 @@ export default function ReportingPage() {
   const [dateRange, setDateRange] = useState('month');
 
   const metrics: ReportMetric[] = [
-    { label: 'Revenue Generated', value: '$125,400', change: '+12%', changeType: 'up', color: 'text-green-600' },
+    {
+      label: 'Revenue Generated',
+      value: '$125,400',
+      change: '+12%',
+      changeType: 'up',
+      color: 'text-green-600',
+    },
     { label: 'Active Projects', value: 28, change: '+3', changeType: 'up', color: 'text-blue-600' },
-    { label: 'Team Utilization', value: '87%', change: '+5%', changeType: 'up', color: 'text-purple-600' },
-    { label: 'On-Time Delivery Rate', value: '92%', change: '-2%', changeType: 'down', color: 'text-orange-600' },
+    {
+      label: 'Team Utilization',
+      value: '87%',
+      change: '+5%',
+      changeType: 'up',
+      color: 'text-purple-600',
+    },
+    {
+      label: 'On-Time Delivery Rate',
+      value: '92%',
+      change: '-2%',
+      changeType: 'down',
+      color: 'text-orange-600',
+    },
   ];
 
   const departmentMetrics = [
@@ -37,7 +55,9 @@ export default function ReportingPage() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-800 text-slate-900 mb-2">Reporting & Analytics</h1>
-            <p className="text-slate-600">Financial and productivity metrics for your organization</p>
+            <p className="text-slate-600">
+              Financial and productivity metrics for your organization
+            </p>
           </div>
           <select
             value={dateRange}
@@ -59,7 +79,9 @@ export default function ReportingPage() {
               <div className="flex items-end justify-between">
                 <p className={`text-3xl font-800 ${metric.color}`}>{metric.value}</p>
                 {metric.change && (
-                  <span className={`text-sm font-600 ${metric.changeType === 'up' ? 'text-green-600' : 'text-orange-600'}`}>
+                  <span
+                    className={`text-sm font-600 ${metric.changeType === 'up' ? 'text-green-600' : 'text-orange-600'}`}
+                  >
                     {metric.change}
                   </span>
                 )}
@@ -75,19 +97,30 @@ export default function ReportingPage() {
             <table className="w-full">
               <thead>
                 <tr className="border-b border-slate-200">
-                  <th className="text-left py-3 px-4 font-700 text-slate-900 text-sm">Department</th>
+                  <th className="text-left py-3 px-4 font-700 text-slate-900 text-sm">
+                    Department
+                  </th>
                   <th className="text-right py-3 px-4 font-700 text-slate-900 text-sm">Revenue</th>
                   <th className="text-right py-3 px-4 font-700 text-slate-900 text-sm">Projects</th>
-                  <th className="text-right py-3 px-4 font-700 text-slate-900 text-sm">Efficiency</th>
+                  <th className="text-right py-3 px-4 font-700 text-slate-900 text-sm">
+                    Efficiency
+                  </th>
                   <th className="text-right py-3 px-4 font-700 text-slate-900 text-sm">Tasks</th>
                 </tr>
               </thead>
               <tbody>
                 {departmentMetrics.map((dept, idx) => (
-                  <tr key={idx} className="border-b border-slate-100 hover:bg-slate-50 transition-colors">
+                  <tr
+                    key={idx}
+                    className="border-b border-slate-100 hover:bg-slate-50 transition-colors"
+                  >
                     <td className="py-4 px-4 font-600 text-slate-900">{dept.name}</td>
-                    <td className="py-4 px-4 text-right text-slate-900 font-600">${dept.revenue.toLocaleString()}</td>
-                    <td className="py-4 px-4 text-right text-slate-900 font-600">{dept.projects}</td>
+                    <td className="py-4 px-4 text-right text-slate-900 font-600">
+                      ${dept.revenue.toLocaleString()}
+                    </td>
+                    <td className="py-4 px-4 text-right text-slate-900 font-600">
+                      {dept.projects}
+                    </td>
                     <td className="py-4 px-4 text-right">
                       <div className="flex items-center justify-end gap-2">
                         <div className="w-12 h-2 bg-slate-200 rounded-full overflow-hidden">

@@ -49,24 +49,20 @@ export function useProjects(departmentId?: string) {
   };
 
   const createProject = async (projectData: Partial<Project>) => {
-    try {
-      const res = await fetch('/api/projects', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(projectData),
-      });
+    const res = await fetch('/api/projects', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(projectData),
+    });
 
-      const data = await res.json();
+    const data = await res.json();
 
-      if (!res.ok) {
-        throw new Error(data.error || 'Failed to create project');
-      }
-
-      setProjects([...projects, data]);
-      return data;
-    } catch (err) {
-      throw err;
+    if (!res.ok) {
+      throw new Error(data.error || 'Failed to create project');
     }
+
+    setProjects([...projects, data]);
+    return data;
   };
 
   return {

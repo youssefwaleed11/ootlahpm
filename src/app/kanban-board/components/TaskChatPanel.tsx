@@ -1,7 +1,14 @@
 'use client';
 import React, { useState, useRef, useEffect } from 'react';
 import Icon from '@/components/ui/AppIcon';
-import { getCommentsByTask, getUserById, CURRENT_USER, timeAgo, type Task, type Comment } from '@/lib/mockData';
+import {
+  getCommentsByTask,
+  getUserById,
+  CURRENT_USER,
+  timeAgo,
+  type Task,
+  type Comment,
+} from '@/lib/mockData';
 import { toast } from 'sonner';
 
 interface TaskChatPanelProps {
@@ -33,7 +40,7 @@ export default function TaskChatPanel({ task, onClose }: TaskChatPanelProps) {
       createdAt: new Date().toISOString(),
       isEdited: false,
     };
-    setComments(prev => [...prev, newComment]);
+    setComments((prev) => [...prev, newComment]);
     setInput('');
     toast.success('Comment added');
   };
@@ -52,9 +59,14 @@ export default function TaskChatPanel({ task, onClose }: TaskChatPanelProps) {
         <div className="flex items-center gap-2">
           <Icon name="ChatBubbleLeftIcon" size={16} className="text-brand-teal" />
           <h3 className="text-sm font-700 text-slate-800">Task Chat</h3>
-          <span className="text-[10px] font-600 text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded-full">{comments.length}</span>
+          <span className="text-[10px] font-600 text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded-full">
+            {comments.length}
+          </span>
         </div>
-        <button onClick={onClose} className="p-1 rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors">
+        <button
+          onClick={onClose}
+          className="p-1 rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors"
+        >
           <Icon name="XMarkIcon" size={14} />
         </button>
       </div>
@@ -72,12 +84,14 @@ export default function TaskChatPanel({ task, onClose }: TaskChatPanelProps) {
           <div className="flex flex-col items-center justify-center h-full text-center py-8">
             <Icon name="ChatBubbleLeftEllipsisIcon" size={28} className="text-slate-300 mb-2" />
             <p className="text-xs text-slate-400 font-500">No comments yet</p>
-            <p className="text-[11px] text-slate-400 mt-1">Start the conversation about this task</p>
+            <p className="text-[11px] text-slate-400 mt-1">
+              Start the conversation about this task
+            </p>
           </div>
         ) : (
-          comments.map(comment => {
+          comments.map((comment) => {
             const user = getUserById(comment.userId);
-            const isMe = comment.userId ===CURRENT_USER.id;
+            const isMe = comment.userId === CURRENT_USER.id;
             return (
               <div key={comment.id} className={`flex gap-2 ${isMe ? 'flex-row-reverse' : ''}`}>
                 {!isMe && (
@@ -87,14 +101,20 @@ export default function TaskChatPanel({ task, onClose }: TaskChatPanelProps) {
                 )}
                 <div className={`max-w-[85%] flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
                   {!isMe && (
-                    <span className="text-[10px] text-slate-500 font-500 mb-0.5 px-1">{user?.name.split(' ')[0]}</span>
+                    <span className="text-[10px] text-slate-500 font-500 mb-0.5 px-1">
+                      {user?.name.split(' ')[0]}
+                    </span>
                   )}
-                  <div className={`px-3 py-2 rounded-xl text-xs leading-relaxed ${isMe ? 'bg-brand-orange text-white rounded-tr-sm' : 'bg-white text-slate-700 rounded-tl-sm border border-slate-200 shadow-card'}`}>
+                  <div
+                    className={`px-3 py-2 rounded-xl text-xs leading-relaxed ${isMe ? 'bg-brand-orange text-white rounded-tr-sm' : 'bg-white text-slate-700 rounded-tl-sm border border-slate-200 shadow-card'}`}
+                  >
                     {comment.content}
                   </div>
                   <div className="flex items-center gap-1.5 mt-0.5 px-1">
                     <span className="text-[9px] text-slate-400">{timeAgo(comment.createdAt)}</span>
-                    {comment.isEdited && <span className="text-[9px] text-slate-400">(edited)</span>}
+                    {comment.isEdited && (
+                      <span className="text-[9px] text-slate-400">(edited)</span>
+                    )}
                   </div>
                 </div>
               </div>
@@ -112,7 +132,7 @@ export default function TaskChatPanel({ task, onClose }: TaskChatPanelProps) {
           </div>
           <textarea
             value={input}
-            onChange={e => setInput(e.target.value)}
+            onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Add a comment..."
             rows={1}

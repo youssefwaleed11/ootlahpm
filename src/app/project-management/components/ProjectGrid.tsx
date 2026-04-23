@@ -36,7 +36,9 @@ export default function ProjectGrid({ projects, onEdit, onArchive, onDelete }: P
           <Icon name="FolderOpenIcon" size={28} className="text-slate-400" />
         </div>
         <h3 className="text-base font-600 text-slate-700 mb-1">No projects found</h3>
-        <p className="text-sm text-slate-400 max-w-xs">Projects you create will appear here. Try adjusting your filters or create a new project.</p>
+        <p className="text-sm text-slate-400 max-w-xs">
+          Projects you create will appear here. Try adjusting your filters or create a new project.
+        </p>
       </div>
     );
   }
@@ -57,7 +59,7 @@ export default function ProjectGrid({ projects, onEdit, onArchive, onDelete }: P
   return (
     <>
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-3 gap-4">
-        {projects.map(project => {
+        {projects.map((project) => {
           const team = getTeamById(project.teamId);
           const admin = getUserById(project.adminId);
           const overdue = isOverdue(project.dueDate) && project.status === 'active';
@@ -76,9 +78,12 @@ export default function ProjectGrid({ projects, onEdit, onArchive, onDelete }: P
               <div
                 className="h-1 w-full"
                 style={{
-                  background: project.status === 'archived' ?'#e2e8f0'
-                    : project.priority === 'critical' ?'linear-gradient(90deg, #ef4444, #f97316)'
-                    : `linear-gradient(90deg, ${team?.color || '#F97316'}, ${team?.color || '#0D9488'}88)`
+                  background:
+                    project.status === 'archived'
+                      ? '#e2e8f0'
+                      : project.priority === 'critical'
+                        ? 'linear-gradient(90deg, #ef4444, #f97316)'
+                        : `linear-gradient(90deg, ${team?.color || '#F97316'}, ${team?.color || '#0D9488'}88)`,
                 }}
               />
 
@@ -87,10 +92,14 @@ export default function ProjectGrid({ projects, onEdit, onArchive, onDelete }: P
                 <div className="flex items-start justify-between gap-2 mb-3">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
-                      <span className={`text-[10px] font-700 px-2 py-0.5 rounded-full ${status.className}`}>
+                      <span
+                        className={`text-[10px] font-700 px-2 py-0.5 rounded-full ${status.className}`}
+                      >
                         {status.label}
                       </span>
-                      <span className={`flex items-center gap-1 text-[10px] font-600 ${priority.className}`}>
+                      <span
+                        className={`flex items-center gap-1 text-[10px] font-600 ${priority.className}`}
+                      >
                         <span className={`w-1.5 h-1.5 rounded-full ${priority.dot}`} />
                         {priority.label}
                       </span>
@@ -111,7 +120,10 @@ export default function ProjectGrid({ projects, onEdit, onArchive, onDelete }: P
                     {isMenuOpen && (
                       <div className="absolute right-0 top-8 w-44 bg-white rounded-xl border border-slate-200 shadow-modal z-20 overflow-hidden fade-in">
                         <button
-                          onClick={() => { onEdit(project); setMenuOpen(null); }}
+                          onClick={() => {
+                            onEdit(project);
+                            setMenuOpen(null);
+                          }}
                           className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-500 text-slate-600 hover:bg-slate-50 transition-colors"
                         >
                           <Icon name="PencilSquareIcon" size={14} className="text-slate-400" />
@@ -123,7 +135,7 @@ export default function ProjectGrid({ projects, onEdit, onArchive, onDelete }: P
                           className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-500 text-slate-600 hover:bg-slate-50 transition-colors"
                         >
                           <Icon name="ViewColumnsIcon" size={14} className="text-slate-400" />
-                          Open Kanban
+                          Open Work Board
                         </Link>
                         <button
                           onClick={() => handleArchive(project.id)}
@@ -134,7 +146,10 @@ export default function ProjectGrid({ projects, onEdit, onArchive, onDelete }: P
                         </button>
                         <div className="h-px bg-slate-100 my-0.5" />
                         <button
-                          onClick={() => { setConfirmDelete(project.id); setMenuOpen(null); }}
+                          onClick={() => {
+                            setConfirmDelete(project.id);
+                            setMenuOpen(null);
+                          }}
                           className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-500 text-red-500 hover:bg-red-50 transition-colors"
                         >
                           <Icon name="TrashIcon" size={14} className="text-red-400" />
@@ -154,24 +169,27 @@ export default function ProjectGrid({ projects, onEdit, onArchive, onDelete }: P
                 <div className="mb-3">
                   <div className="flex items-center justify-between mb-1">
                     <span className="text-[10px] font-600 text-slate-500">Progress</span>
-                    <span className="text-[11px] font-700 text-slate-700 font-tabular">{project.completedTaskCount}/{project.taskCount} tasks</span>
+                    <span className="text-[11px] font-700 text-slate-700 font-tabular">
+                      {project.completedTaskCount}/{project.taskCount} tasks
+                    </span>
                   </div>
                   <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
                     <div
                       className="h-full rounded-full transition-all duration-500"
                       style={{
                         width: `${project.progress}%`,
-                        background: project.progress === 100
-                          ? 'linear-gradient(90deg, #10b981, #0d9488)'
-                          : project.progress >= 70
-                          ? 'linear-gradient(90deg, #f97316, #0d9488)'
-                          : 'linear-gradient(90deg, #f97316, #fb923c)',
+                        background:
+                          project.progress === 100
+                            ? 'linear-gradient(90deg, #10b981, #0d9488)'
+                            : project.progress >= 70
+                              ? 'linear-gradient(90deg, #f97316, #0d9488)'
+                              : 'linear-gradient(90deg, #f97316, #fb923c)',
                       }}
                     />
                   </div>
                   <div className="flex items-center justify-between mt-1">
                     <span className="text-[10px] text-slate-400">
-                      {project.progress === 100 ? '✓ Complete' : `${project.progress}% done`}
+                      {project.progress === 100 ? 'Complete' : `${project.progress}% done`}
                     </span>
                     {overdue && (
                       <span className="text-[10px] text-red-500 font-600 flex items-center gap-0.5">
@@ -185,8 +203,11 @@ export default function ProjectGrid({ projects, onEdit, onArchive, onDelete }: P
                 {/* Tags */}
                 {project.tags.length > 0 && (
                   <div className="flex flex-wrap gap-1 mb-3">
-                    {project.tags.map(tag => (
-                      <span key={`proj-tag-${project.id}-${tag}`} className="text-[10px] px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-500 font-500">
+                    {project.tags.map((tag) => (
+                      <span
+                        key={`proj-tag-${project.id}-${tag}`}
+                        className="text-[10px] px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-500 font-500"
+                      >
                         {tag}
                       </span>
                     ))}
@@ -203,12 +224,20 @@ export default function ProjectGrid({ projects, onEdit, onArchive, onDelete }: P
                     >
                       <Icon name="UserGroupIcon" size={10} className="text-white" />
                     </div>
-                    <span className="text-[11px] font-500 text-slate-600 truncate max-w-[100px]">{team?.name}</span>
+                    <span className="text-[11px] font-500 text-slate-600 truncate max-w-[100px]">
+                      {team?.name}
+                    </span>
                   </div>
 
                   {/* Due date */}
-                  <div className={`flex items-center gap-1 text-[11px] font-500 ${overdue ? 'text-red-500' : 'text-slate-500'}`}>
-                    <Icon name="CalendarDaysIcon" size={11} className={overdue ? 'text-red-400' : 'text-slate-400'} />
+                  <div
+                    className={`flex items-center gap-1 text-[11px] font-500 ${overdue ? 'text-red-500' : 'text-slate-500'}`}
+                  >
+                    <Icon
+                      name="CalendarDaysIcon"
+                      size={11}
+                      className={overdue ? 'text-red-400' : 'text-slate-400'}
+                    />
                     <span className="font-tabular">{formatDate(project.dueDate)}</span>
                   </div>
                 </div>
@@ -232,7 +261,8 @@ export default function ProjectGrid({ projects, onEdit, onArchive, onDelete }: P
               </div>
             </div>
             <p className="text-sm text-slate-600 mb-5">
-              Deleting this project will permanently remove all tasks, comments, and team assignments associated with it.
+              Deleting this project will permanently remove all tasks, comments, and team
+              assignments associated with it.
             </p>
             <div className="flex gap-2">
               <button

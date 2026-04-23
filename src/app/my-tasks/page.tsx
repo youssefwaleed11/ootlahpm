@@ -31,9 +31,9 @@ export default function MyTasksPage() {
   }, []);
 
   // Show all demo tasks - filter by user if logged in, otherwise show all
-  const myTasks = user ? tasks.filter(t => t.assigned_to?.id === user?.id) : tasks;
+  const myTasks = user ? tasks.filter((t) => t.assigned_to?.id === user?.id) : tasks;
 
-  const filteredTasks = myTasks.filter(task => {
+  const filteredTasks = myTasks.filter((task) => {
     const statusMatch = filterStatus === 'all' || task.status === filterStatus;
     const priorityMatch = filterPriority === 'all' || task.priority === filterPriority;
     return statusMatch && priorityMatch;
@@ -78,9 +78,10 @@ export default function MyTasksPage() {
             <h1 className="text-3xl font-800 text-slate-900 mb-2">My Tasks</h1>
             <p className="text-slate-600">{filteredTasks.length} tasks assigned to you</p>
           </div>
-          <button 
+          <button
             onClick={() => setShowCreateModal(true)}
-            className="flex items-center gap-2 px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-lg font-600 transition-colors">
+            className="flex items-center gap-2 px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-lg font-600 transition-colors"
+          >
             <Icon name="PlusIcon" size={18} />
             New Task
           </button>
@@ -128,15 +129,13 @@ export default function MyTasksPage() {
 
         {/* Error State */}
         {error && (
-          <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
-            {error}
-          </div>
+          <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">{error}</div>
         )}
 
         {/* Tasks List */}
         {!isLoading && !error && (
           <div className="space-y-3">
-            {filteredTasks.map(task => (
+            {filteredTasks.map((task) => (
               <button
                 key={task.id}
                 onClick={() => setSelectedTask(task)}
@@ -154,14 +153,20 @@ export default function MyTasksPage() {
                   {/* Content */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between gap-2 mb-2">
-                      <h3 className={`font-700 text-slate-900 ${task.status === 'completed' ? 'line-through text-slate-500' : ''}`}>
+                      <h3
+                        className={`font-700 text-slate-900 ${task.status === 'completed' ? 'line-through text-slate-500' : ''}`}
+                      >
                         {task.title}
                       </h3>
-                      <span className={`text-xs font-600 px-2 py-1 rounded border whitespace-nowrap ${getPriorityColor(task.priority)}`}>
+                      <span
+                        className={`text-xs font-600 px-2 py-1 rounded border whitespace-nowrap ${getPriorityColor(task.priority)}`}
+                      >
                         {task.priority}
                       </span>
                     </div>
-                    <p className="text-sm text-slate-600 mb-3">{task.project?.name || 'Untitled'}</p>
+                    <p className="text-sm text-slate-600 mb-3">
+                      {task.project?.name || 'Untitled'}
+                    </p>
                     <div className="flex items-center gap-3 text-xs text-slate-600">
                       {task.due_date && (
                         <span className="flex items-center gap-1">
@@ -202,7 +207,7 @@ export default function MyTasksPage() {
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-lg shadow-lg max-w-md w-full p-6">
               <h2 className="text-2xl font-700 text-slate-900 mb-4">Create New Task</h2>
-              
+
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-600 text-slate-900 mb-2">Task Title</label>

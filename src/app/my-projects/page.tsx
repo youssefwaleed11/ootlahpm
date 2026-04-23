@@ -75,9 +75,8 @@ export default function MyProjectsPage() {
     },
   ];
 
-  const filteredProjects = filterStatus === 'all'
-    ? projects
-    : projects.filter(p => p.status === filterStatus);
+  const filteredProjects =
+    filterStatus === 'all' ? projects : projects.filter((p) => p.status === filterStatus);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -107,11 +106,11 @@ export default function MyProjectsPage() {
 
   const getDepartmentColor = (dept: string) => {
     const colors: Record<string, string> = {
-      'marketing': 'text-red-600',
-      'seo': 'text-orange-600',
-      'content': 'text-yellow-600',
-      'designers': 'text-blue-600',
-      'bd': 'text-green-600',
+      marketing: 'text-red-600',
+      seo: 'text-orange-600',
+      content: 'text-yellow-600',
+      designers: 'text-blue-600',
+      bd: 'text-green-600',
       'social-media': 'text-purple-600',
     };
     return colors[dept] || 'text-slate-600';
@@ -149,7 +148,7 @@ export default function MyProjectsPage() {
 
         {/* Projects Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {filteredProjects.map(project => (
+          {filteredProjects.map((project) => (
             <div
               key={project.id}
               className={`rounded-xl border p-6 transition-all hover:shadow-lg cursor-pointer ${getStatusColor(project.status)}`}
@@ -163,7 +162,9 @@ export default function MyProjectsPage() {
                     {project.department.toUpperCase()}
                   </p>
                 </div>
-                <span className={`px-3 py-1 rounded-full text-xs font-600 whitespace-nowrap ${getStatusBadgeColor(project.status)}`}>
+                <span
+                  className={`px-3 py-1 rounded-full text-xs font-600 whitespace-nowrap ${getStatusBadgeColor(project.status)}`}
+                >
                   {project.status.replace('_', ' ')}
                 </span>
               </div>

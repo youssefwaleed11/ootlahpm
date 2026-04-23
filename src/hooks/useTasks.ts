@@ -61,45 +61,37 @@ export function useTasks(options?: UseTasksOptions) {
   };
 
   const createTask = async (taskData: Partial<Task>) => {
-    try {
-      const res = await fetch('/api/tasks', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(taskData),
-      });
+    const res = await fetch('/api/tasks', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(taskData),
+    });
 
-      const data = await res.json();
+    const data = await res.json();
 
-      if (!res.ok) {
-        throw new Error(data.error || 'Failed to create task');
-      }
-
-      setTasks([...tasks, data]);
-      return data;
-    } catch (err) {
-      throw err;
+    if (!res.ok) {
+      throw new Error(data.error || 'Failed to create task');
     }
+
+    setTasks([...tasks, data]);
+    return data;
   };
 
   const updateTask = async (taskId: string, updates: Partial<Task>) => {
-    try {
-      const res = await fetch(`/api/tasks?id=${taskId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updates),
-      });
+    const res = await fetch(`/api/tasks?id=${taskId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(updates),
+    });
 
-      const data = await res.json();
+    const data = await res.json();
 
-      if (!res.ok) {
-        throw new Error(data.error || 'Failed to update task');
-      }
-
-      setTasks(tasks.map(t => t.id === taskId ? data : t));
-      return data;
-    } catch (err) {
-      throw err;
+    if (!res.ok) {
+      throw new Error(data.error || 'Failed to update task');
     }
+
+    setTasks(tasks.map((t) => (t.id === taskId ? data : t)));
+    return data;
   };
 
   return {

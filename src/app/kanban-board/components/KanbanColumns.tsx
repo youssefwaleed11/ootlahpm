@@ -15,40 +15,70 @@ interface KanbanColumnsProps {
 
 const COLUMNS: { id: Task['status']; label: string; color: string; dotColor: string }[] = [
   { id: 'todo', label: 'To Do', color: 'bg-slate-100 text-slate-600', dotColor: 'bg-slate-400' },
-  { id: 'in_progress', label: 'In Progress', color: 'bg-blue-50 text-blue-700', dotColor: 'bg-blue-500' },
-  { id: 'in_review', label: 'In Review', color: 'bg-amber-50 text-amber-700', dotColor: 'bg-amber-500' },
-  { id: 'done', label: 'Done', color: 'bg-emerald-50 text-emerald-700', dotColor: 'bg-emerald-500' },
+  {
+    id: 'in_progress',
+    label: 'In Progress',
+    color: 'bg-blue-50 text-blue-700',
+    dotColor: 'bg-blue-500',
+  },
+  {
+    id: 'in_review',
+    label: 'In Review',
+    color: 'bg-amber-50 text-amber-700',
+    dotColor: 'bg-amber-500',
+  },
+  {
+    id: 'done',
+    label: 'Done',
+    color: 'bg-emerald-50 text-emerald-700',
+    dotColor: 'bg-emerald-500',
+  },
 ];
 
-export default function KanbanColumns({ tasks, onTaskClick, onStatusChange, selectedTaskId }: KanbanColumnsProps) {
+export default function KanbanColumns({
+  tasks,
+  onTaskClick,
+  onStatusChange,
+  selectedTaskId,
+}: KanbanColumnsProps) {
   const [localTasks, setLocalTasks] = useState(tasks);
 
-  React.useEffect(() => { setLocalTasks(tasks); }, [tasks]);
+  React.useEffect(() => {
+    setLocalTasks(tasks);
+  }, [tasks]);
 
   const getColumnTasks = (status: Task['status']) =>
-    localTasks.filter(t => t.status === status).sort((a, b) => a.order - b.order);
+    localTasks.filter((t) => t.status === status).sort((a, b) => a.order - b.order);
 
   const onDragEnd = (result: DropResult) => {
     const { destination, source, draggableId } = result;
     if (!destination) return;
-    if (destination.droppableId === source.droppableId && destination.index === source.index) return;
+    if (destination.droppableId === source.droppableId && destination.index === source.index)
+      return;
 
     const newStatus = destination.droppableId as Task['status'];
     // BACKEND INTEGRATION: Supabase update task status and order
-    setLocalTasks(prev => prev.map(t => t.id === draggableId ? { ...t, status: newStatus, order: destination.index } : t));
+    setLocalTasks((prev) =>
+      prev.map((t) =>
+        t.id === draggableId ? { ...t, status: newStatus, order: destination.index } : t
+      )
+    );
     onStatusChange(draggableId, newStatus);
 
-    const col = COLUMNS.find(c => c.id === newStatus);
+    const col = COLUMNS.find((c) => c.id === newStatus);
     toast.success(`Task moved to ${col?.label}`);
   };
 
   return (
     <DragDropContext onDragEnd={onDragEnd}>
       <div className="flex gap-0 h-full overflow-x-auto scrollbar-thin">
-        {COLUMNS.map(col => {
+        {COLUMNS.map((col) => {
           const colTasks = getColumnTasks(col.id);
           return (
-            <div key={`col-${col.id}`} className="flex-shrink-0 w-72 xl:w-80 flex flex-col h-full border-r border-slate-200 last:border-r-0">
+            <div
+              key={`col-${col.id}`}
+              className="flex-shrink-0 w-72 xl:w-80 flex flex-col h-full border-r border-slate-200 last:border-r-0"
+            >
               {/* Column header */}
               <div className="flex items-center justify-between px-4 py-3 border-b border-slate-200 bg-white flex-shrink-0">
                 <div className="flex items-center gap-2">
@@ -74,10 +104,16 @@ export default function KanbanColumns({ tasks, onTaskClick, onStatusChange, sele
                     {colTasks.length === 0 && !snapshot.isDraggingOver && (
                       <div className="flex flex-col items-center justify-center py-10 text-center">
                         <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center mb-2">
-                          <Icon name="ClipboardDocumentListIcon" size={18} className="text-slate-400" />
+                          <Icon
+                            name="ClipboardDocumentListIcon"
+                            size={18}
+                            className="text-slate-400"
+                          />
                         </div>
                         <p className="text-xs text-slate-400 font-500">No tasks here</p>
-                        <p className="text-[11px] text-slate-400 mt-0.5">Drag a card or create a new task</p>
+                        <p className="text-[11px] text-slate-400 mt-0.5">
+                          Drag a card or create a new task
+                        </p>
                       </div>
                     )}
                     {colTasks.map((task, index) => (

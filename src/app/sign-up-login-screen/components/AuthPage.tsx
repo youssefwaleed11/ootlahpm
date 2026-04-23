@@ -1,96 +1,178 @@
 'use client';
-import React, { useState } from 'react';
+import React, { Suspense, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
-import { useRouter } from 'next/navigation';
-import AppLogo from '@/components/ui/AppLogo';
-import AppImage from '@/components/ui/AppImage';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Icon from '@/components/ui/AppIcon';
 
-type LoginForm = { email: string; password: string; remember: boolean };
-type SignupForm = { name: string; email: string; password: string; confirmPassword: string };
+type Mode = 'login' | 'accept_invite';
 
-const DEMO_CREDENTIALS = [
-  { role: 'Admin', email: 'layla@ootlah.com', password: 'Admin@2026' },
-  { role: 'Team Leader', email: 'omar@ootlah.com', password: 'Leader@2026' },
-  { role: 'Agent', email: 'nour@ootlah.com', password: 'Agent@2026' },
-];
+type LoginForm = { email: string; password: string };
+type AcceptForm = {
+  email: string;
+  fullName: string;
+  password: string;
+  confirmPassword: string;
+};
 
-export default function AuthPage() {
-  const [tab, setTab] = useState<'login' | 'signup'>('login');
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirm, setShowConfirm] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+interface InvitationSummary {
+  email: string;
+  full_name: string | null;
+  role: 'admin' | 'team_leader' | 'agent';
+  position: string | null;
+  department: { name: string; color: string } | null;
+}
+
+function AuthPageInner() {
   const router = useRouter();
+  const params = useSearchParams();
+  const inviteToken = params.get('invite');
 
-  const loginForm = useForm<LoginForm>({ defaultValues: { email: '', password: '', remember: false } });
-  const signupForm = useForm<SignupForm>({ defaultValues: { name: '', email: '', password: '', confirmPassword: '' } });
+  const [mode, setMode] = useState<Mode>(inviteToken ? 'accept_invite' : 'login');
+  const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [invitation, setInvitation] = useState<InvitationSummary | null>(null);
+  const [inviteError, setInviteError] = useState<string | null>(null);
 
-  const handleLoginSubmit = async (data: LoginForm) => {
+  const loginForm = useForm<LoginForm>({ defaultValues: { email: '', password: '' } });
+  const acceptForm = useForm<AcceptForm>({
+    defaultValues: { email: '', fullName: '', password: '', confirmPassword: '' },
+  });
+
+  useEffect(() => {
+    if (!inviteToken) return;
+    setMode('accept_invite');
     setIsLoading(true);
-    // BACKEND INTEGRATION: Supabase auth.signInWithPassword({ email, password })
-    await new Promise(r => setTimeout(r, 1200));
-    const valid = DEMO_CREDENTIALS.find(c => c.email === data.email && c.password === data.password);
-    if (!valid) {
+    fetch(`/api/invitations/${inviteToken}`)
+      .then(async (r) => ({ ok: r.ok, body: await r.json() }))
+      .then(({ ok, body }) => {
+        if (!ok) {
+          setInviteError(body?.error ?? 'Invitation is not valid.');
+          setInvitation(null);
+        } else {
+          const inv = body.invitation as InvitationSummary;
+          setInvitation(inv);
+          acceptForm.reset({
+            email: inv.email,
+            fullName: inv.full_name ?? '',
+            password: '',
+            confirmPassword: '',
+          });
+        }
+      })
+      .catch(() => setInviteError('Could not reach the server.'))
+      .finally(() => setIsLoading(false));
+  }, [inviteToken, acceptForm]);
+
+  const handleLogin = async (data: LoginForm) => {
+    setIsLoading(true);
+    try {
+      const r = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ email: data.email, password: data.password }),
+      });
+      const body = await r.json();
+      if (!r.ok) {
+        loginForm.setError('password', {
+          message: body?.error ?? 'Invalid email or password.',
+        });
+        return;
+      }
+      toast.success(`Welcome back, ${body.user.full_name ?? body.user.email}.`);
+      const next = params.get('next') || '/dashboard';
+      router.push(next);
+      router.refresh();
+    } catch (err) {
+      console.error(err);
+      toast.error('Network error. Please try again.');
+    } finally {
       setIsLoading(false);
-      loginForm.setError('email', { message: 'Invalid credentials — use the demo accounts below to sign in' });
-      return;
     }
-    toast.success(`Welcome back! Signed in as ${valid.role}.`);
-    router.push('/kanban-board');
   };
 
-  const handleSignupSubmit = async (data: SignupForm) => {
+  const handleAccept = async (data: AcceptForm) => {
     if (data.password !== data.confirmPassword) {
-      signupForm.setError('confirmPassword', { message: 'Passwords do not match' });
+      acceptForm.setError('confirmPassword', { message: 'Passwords do not match.' });
       return;
     }
+    if (!inviteToken) return;
     setIsLoading(true);
-    // BACKEND INTEGRATION: Supabase auth.signUp() + check invite_tokens table for valid invite
-    await new Promise(r => setTimeout(r, 1200));
-    setIsLoading(false);
-    toast.error('Sign-up requires an admin invitation. Contact your workspace admin.');
+    try {
+      const r = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: data.email,
+          fullName: data.fullName,
+          password: data.password,
+          token: inviteToken,
+        }),
+      });
+      const body = await r.json();
+      if (!r.ok) {
+        toast.error(body?.error ?? 'Could not accept invitation.');
+        return;
+      }
+      toast.success('Account created. Signing you in...');
+      // Auto-login
+      await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ email: data.email, password: data.password }),
+      });
+      router.push('/dashboard');
+      router.refresh();
+    } catch {
+      toast.error('Network error. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const autofillCredentials = (email: string, password: string) => {
-    loginForm.setValue('email', email);
-    loginForm.setValue('password', password);
-    setTab('login');
-    toast.info('Credentials filled — click Sign In to continue.');
+  const goToLogin = () => {
+    setMode('login');
+    router.replace('/sign-up-login-screen');
   };
 
   return (
-    <div className="min-h-screen flex">
+    <div
+      className="min-h-screen flex"
+      style={{ background: 'linear-gradient(135deg, #0f0b05 0%, #1e1508 100%)' }}
+    >
       {/* Left panel — brand */}
-      <div className="hidden lg:flex lg:w-1/2 xl:w-[55%] relative flex-col items-center justify-center overflow-hidden"
-        style={{ background: 'linear-gradient(135deg, #1E293B 0%, #0F172A 60%, #1a3a4a 100%)' }}>
-        {/* Decorative circles */}
-        <div className="absolute top-[-80px] right-[-80px] w-96 h-96 rounded-full opacity-10" style={{ background: 'radial-gradient(circle, #F97316 0%, transparent 70%)' }} />
-        <div className="absolute bottom-[-60px] left-[-60px] w-72 h-72 rounded-full opacity-10" style={{ background: 'radial-gradient(circle, #0D9488 0%, transparent 70%)' }} />
+      <div className="hidden lg:flex lg:w-1/2 xl:w-[55%] relative flex-col items-center justify-center overflow-hidden">
+        <div
+          className="absolute top-[-80px] right-[-80px] w-96 h-96 rounded-full opacity-10"
+          style={{ background: 'radial-gradient(circle, #ecd862 0%, transparent 70%)' }}
+        />
+        <div
+          className="absolute bottom-[-60px] left-[-60px] w-72 h-72 rounded-full opacity-10"
+          style={{ background: 'radial-gradient(circle, #ddab33 0%, transparent 70%)' }}
+        />
 
         <div className="relative z-10 flex flex-col items-center text-center max-w-md px-8">
-          <div className="flex items-center gap-3 mb-10">
-            <img src="/logo.png" alt="Ootlah" className="w-12 h-12 rounded" />
+          <div className="flex items-center gap-3 mb-8">
+            <img src="/logo.png" alt="Ootlah" className="w-16 h-16 rounded-lg" />
+            <span className="text-4xl font-800 text-brand-gold tracking-tight">Ootlah</span>
           </div>
 
-          <h1 className="text-3xl font-800 text-white mb-2 leading-tight">
-            Ootlah Project Management System 2026
+          <h1 className="text-2xl font-700 text-content-primary mb-3 leading-tight">
+            Project Management for Ootlah Agency
           </h1>
+          <p className="text-content-secondary text-sm leading-relaxed mb-8">
+            Plan campaigns, coordinate tasks across departments, and keep every client project
+            moving forward — all in one place.
+          </p>
 
-          <div className="w-full rounded-2xl overflow-hidden shadow-2xl my-8 border border-white/10">
-            <AppImage
-              src="/assets/images/imgi_1_default-1776780049095.png"
-              alt="Ootlah Project Management System dashboard showing task management"
-              width={560}
-              height={320}
-              className="w-full object-cover"
-            />
-          </div>
-
-          {/* Feature pills */}
           <div className="flex flex-wrap justify-center gap-2">
-            {['Projects', 'Tasks', 'Team Chat', 'Portfolios', 'Analytics'].map(f => (
-              <span key={`feat-${f}`} className="text-xs px-3 py-1.5 rounded-full border border-white/20 text-slate-300 bg-white/5">
+            {['Projects', 'Tasks', 'Team Chat', 'Approvals', 'Reporting'].map((f) => (
+              <span
+                key={`feat-${f}`}
+                className="text-xs px-3 py-1.5 rounded-full border border-brand-gold/30 text-brand-gold bg-brand-gold/5"
+              >
                 {f}
               </span>
             ))}
@@ -99,270 +181,233 @@ export default function AuthPage() {
       </div>
 
       {/* Right panel — form */}
-      <div className="flex-1 flex flex-col items-center justify-center px-6 py-10 bg-slate-50">
-        {/* Mobile logo */}
+      <div className="flex-1 flex flex-col items-center justify-center px-6 py-10">
         <div className="lg:hidden flex items-center gap-2 mb-8">
           <img src="/logo.png" alt="Ootlah" className="w-10 h-10 rounded" />
-          <span className="text-slate-800 text-lg font-700">Ootlah PM</span>
+          <span className="text-brand-gold text-lg font-700">Ootlah PM</span>
         </div>
 
         <div className="w-full max-w-md">
-          {/* Tabs */}
-          <div className="flex bg-white rounded-xl border border-slate-200 p-1 mb-6 shadow-card">
-            {(['login', 'signup'] as const).map(t => (
-              <button
-                key={`tab-${t}`}
-                onClick={() => setTab(t)}
-                className={`flex-1 py-2 text-sm font-600 rounded-lg transition-all duration-200 ${
-                  tab === t
-                    ? 'bg-brand-orange text-white shadow-sm'
-                    : 'text-slate-500 hover:text-slate-700'
-                }`}
-              >
-                {t === 'login' ? 'Sign In' : 'Sign Up'}
-              </button>
-            ))}
-          </div>
+          {mode === 'login' && (
+            <div className="bg-surface border border-brand-gold/10 rounded-2xl p-8 shadow-xl">
+              <h2 className="text-2xl font-700 text-content-primary mb-2">Sign in to Ootlah</h2>
+              <p className="text-content-secondary text-sm mb-6">
+                Use the email and password your administrator set up for you.
+              </p>
 
-          {/* Login Form */}
-          {tab === 'login' && (
-            <div className="bg-white rounded-2xl border border-slate-200 shadow-card p-6 fade-in">
-              <h2 className="text-lg font-700 text-slate-800 mb-1">Welcome back</h2>
-              <p className="text-sm text-slate-500 mb-5">Sign in to your OotlahPM workspace</p>
-
-              <form onSubmit={loginForm.handleSubmit(handleLoginSubmit)} className="space-y-4">
+              <form onSubmit={loginForm.handleSubmit(handleLogin)} className="space-y-4">
                 <div>
-                  <label className="block text-xs font-600 text-slate-700 mb-1.5" htmlFor="login-email">
-                    Work Email
+                  <label className="block text-sm font-600 text-content-primary mb-1.5">
+                    Email
                   </label>
                   <input
-                    id="login-email"
                     type="email"
-                    placeholder="you@company.com"
-                    className={`w-full px-3.5 py-2.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-orange/30 focus:border-brand-orange transition-all duration-150 ${loginForm.formState.errors.email ? 'border-red-400 bg-red-50' : 'border-slate-200 bg-slate-50'}`}
-                    {...loginForm.register('email', { required: 'Email is required', pattern: { value: /^\S+@\S+\.\S+$/, message: 'Enter a valid email' } })}
+                    {...loginForm.register('email', { required: 'Email is required' })}
+                    className="w-full px-4 py-2.5 rounded-lg bg-surface-dark border border-brand-gold/20 text-content-primary placeholder:text-content-muted focus:outline-none focus:border-brand-gold focus:ring-1 focus:ring-brand-gold transition-colors"
+                    placeholder="you@ootlah.com"
                   />
                   {loginForm.formState.errors.email && (
-                    <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
-                      <Icon name="ExclamationCircleIcon" size={12} />
+                    <p className="mt-1 text-xs text-brand-amber">
                       {loginForm.formState.errors.email.message}
                     </p>
                   )}
                 </div>
 
                 <div>
-                  <div className="flex items-center justify-between mb-1.5">
-                    <label className="text-xs font-600 text-slate-700" htmlFor="login-password">Password</label>
-                    <span className="text-xs text-brand-orange hover:underline cursor-pointer font-500">Forgot password?</span>
-                  </div>
+                  <label className="block text-sm font-600 text-content-primary mb-1.5">
+                    Password
+                  </label>
                   <div className="relative">
                     <input
-                      id="login-password"
                       type={showPassword ? 'text' : 'password'}
-                      placeholder="••••••••"
-                      className={`w-full px-3.5 py-2.5 pr-10 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-orange/30 focus:border-brand-orange transition-all duration-150 ${loginForm.formState.errors.password ? 'border-red-400 bg-red-50' : 'border-slate-200 bg-slate-50'}`}
-                      {...loginForm.register('password', { required: 'Password is required', minLength: { value: 6, message: 'Minimum 6 characters' } })}
+                      {...loginForm.register('password', { required: 'Password is required' })}
+                      className="w-full px-4 py-2.5 pr-10 rounded-lg bg-surface-dark border border-brand-gold/20 text-content-primary placeholder:text-content-muted focus:outline-none focus:border-brand-gold focus:ring-1 focus:ring-brand-gold transition-colors"
+                      placeholder="Enter your password"
                     />
                     <button
                       type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                      onClick={() => setShowPassword((s) => !s)}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-content-muted hover:text-brand-gold"
+                      aria-label={showPassword ? 'Hide password' : 'Show password'}
                     >
-                      <Icon name={showPassword ? 'EyeSlashIcon' : 'EyeIcon'} size={16} />
+                      <Icon name={showPassword ? 'EyeSlashIcon' : 'EyeIcon'} size={18} />
                     </button>
                   </div>
                   {loginForm.formState.errors.password && (
-                    <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
-                      <Icon name="ExclamationCircleIcon" size={12} />
+                    <p className="mt-1 text-xs text-brand-amber">
                       {loginForm.formState.errors.password.message}
                     </p>
                   )}
                 </div>
 
-                <div className="flex items-center gap-2">
-                  <input
-                    id="remember"
-                    type="checkbox"
-                    className="w-3.5 h-3.5 accent-brand-orange"
-                    {...loginForm.register('remember')}
-                  />
-                  <label htmlFor="remember" className="text-xs text-slate-600 cursor-pointer">Keep me signed in</label>
-                </div>
-
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full py-2.5 rounded-lg bg-brand-orange hover:bg-brand-orange-dark text-white text-sm font-600 transition-all duration-150 active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  className="w-full py-2.5 rounded-lg bg-brand-gold text-brand-navy-dark font-700 hover:bg-brand-gold-dark disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
-                  {isLoading ? (
-                    <>
-                      <Icon name="ArrowPathIcon" size={16} className="animate-spin" />
-                      Signing in...
-                    </>
-                  ) : 'Sign In'}
+                  {isLoading ? 'Signing in...' : 'Sign in'}
                 </button>
               </form>
 
-              {/* Divider */}
-              <div className="flex items-center gap-3 my-4">
-                <div className="flex-1 h-px bg-slate-200" />
-                <span className="text-xs text-slate-400">or continue with</span>
-                <div className="flex-1 h-px bg-slate-200" />
-              </div>
-
-              {/* Social */}
-              <div className="grid grid-cols-2 gap-2">
-                {[{ label: 'Google', icon: 'GlobeAltIcon' }, { label: 'GitHub', icon: 'CodeBracketIcon' }].map(s => (
-                  <button
-                    key={`social-${s.label}`}
-                    className="flex items-center justify-center gap-2 py-2 border border-slate-200 rounded-lg text-sm text-slate-600 font-500 hover:bg-slate-50 hover:border-slate-300 transition-all duration-150"
-                    onClick={() => toast.info(`${s.label} OAuth — connect Supabase OAuth provider`)}
-                  >
-                    <Icon name={s.icon as Parameters<typeof Icon>[0]['name']} size={16} />
-                    {s.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Signup Form */}
-          {tab === 'signup' && (
-            <div className="bg-white rounded-2xl border border-slate-200 shadow-card p-6 fade-in">
-              <h2 className="text-lg font-700 text-slate-800 mb-1">Create your account</h2>
-              <div className="flex items-start gap-2 bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4">
-                <Icon name="ShieldExclamationIcon" size={16} className="text-amber-600 flex-shrink-0 mt-0.5" />
-                <p className="text-xs text-amber-700 leading-relaxed">
-                  <strong>Invite-only access.</strong> You must be invited by a workspace admin before you can create an account. Check your email for an invitation link.
-                </p>
-              </div>
-
-              <form onSubmit={signupForm.handleSubmit(handleSignupSubmit)} className="space-y-4">
-                <div>
-                  <label className="block text-xs font-600 text-slate-700 mb-1.5" htmlFor="signup-name">Full Name</label>
-                  <input
-                    id="signup-name"
-                    type="text"
-                    placeholder="Layla Al-Rashidi"
-                    className={`w-full px-3.5 py-2.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-orange/30 focus:border-brand-orange transition-all duration-150 ${signupForm.formState.errors.name ? 'border-red-400 bg-red-50' : 'border-slate-200 bg-slate-50'}`}
-                    {...signupForm.register('name', { required: 'Full name is required', minLength: { value: 2, message: 'Name must be at least 2 characters' } })}
-                  />
-                  {signupForm.formState.errors.name && (
-                    <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
-                      <Icon name="ExclamationCircleIcon" size={12} />
-                      {signupForm.formState.errors.name.message}
-                    </p>
-                  )}
-                </div>
-
-                <div>
-                  <label className="block text-xs font-600 text-slate-700 mb-1.5" htmlFor="signup-email">Work Email</label>
-                  <p className="text-[11px] text-slate-400 mb-1.5">Must match the email your admin used to invite you</p>
-                  <input
-                    id="signup-email"
-                    type="email"
-                    placeholder="you@company.com"
-                    className={`w-full px-3.5 py-2.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-orange/30 focus:border-brand-orange transition-all duration-150 ${signupForm.formState.errors.email ? 'border-red-400 bg-red-50' : 'border-slate-200 bg-slate-50'}`}
-                    {...signupForm.register('email', { required: 'Email is required', pattern: { value: /^\S+@\S+\.\S+$/, message: 'Enter a valid email' } })}
-                  />
-                  {signupForm.formState.errors.email && (
-                    <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
-                      <Icon name="ExclamationCircleIcon" size={12} />
-                      {signupForm.formState.errors.email.message}
-                    </p>
-                  )}
-                </div>
-
-                <div>
-                  <label className="block text-xs font-600 text-slate-700 mb-1.5" htmlFor="signup-password">Password</label>
-                  <div className="relative">
-                    <input
-                      id="signup-password"
-                      type={showPassword ? 'text' : 'password'}
-                      placeholder="Min. 8 characters"
-                      className={`w-full px-3.5 py-2.5 pr-10 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-orange/30 focus:border-brand-orange transition-all duration-150 ${signupForm.formState.errors.password ? 'border-red-400 bg-red-50' : 'border-slate-200 bg-slate-50'}`}
-                      {...signupForm.register('password', { required: 'Password is required', minLength: { value: 8, message: 'Minimum 8 characters' } })}
-                    />
-                    <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors">
-                      <Icon name={showPassword ? 'EyeSlashIcon' : 'EyeIcon'} size={16} />
-                    </button>
-                  </div>
-                  {signupForm.formState.errors.password && (
-                    <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
-                      <Icon name="ExclamationCircleIcon" size={12} />
-                      {signupForm.formState.errors.password.message}
-                    </p>
-                  )}
-                </div>
-
-                <div>
-                  <label className="block text-xs font-600 text-slate-700 mb-1.5" htmlFor="signup-confirm">Confirm Password</label>
-                  <div className="relative">
-                    <input
-                      id="signup-confirm"
-                      type={showConfirm ? 'text' : 'password'}
-                      placeholder="Re-enter your password"
-                      className={`w-full px-3.5 py-2.5 pr-10 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-orange/30 focus:border-brand-orange transition-all duration-150 ${signupForm.formState.errors.confirmPassword ? 'border-red-400 bg-red-50' : 'border-slate-200 bg-slate-50'}`}
-                      {...signupForm.register('confirmPassword', { required: 'Please confirm your password' })}
-                    />
-                    <button type="button" onClick={() => setShowConfirm(!showConfirm)} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors">
-                      <Icon name={showConfirm ? 'EyeSlashIcon' : 'EyeIcon'} size={16} />
-                    </button>
-                  </div>
-                  {signupForm.formState.errors.confirmPassword && (
-                    <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
-                      <Icon name="ExclamationCircleIcon" size={12} />
-                      {signupForm.formState.errors.confirmPassword.message}
-                    </p>
-                  )}
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={isLoading}
-                  className="w-full py-2.5 rounded-lg bg-brand-orange hover:bg-brand-orange-dark text-white text-sm font-600 transition-all duration-150 active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                >
-                  {isLoading ? (
-                    <><Icon name="ArrowPathIcon" size={16} className="animate-spin" />Creating account...</>
-                  ) : 'Create Account'}
-                </button>
-              </form>
-
-              <p className="text-[11px] text-slate-400 text-center mt-4">
-                By creating an account you agree to our{' '}
-                <span className="text-brand-orange hover:underline cursor-pointer">Terms of Service</span>
-                {' '}and{' '}
-                <span className="text-brand-orange hover:underline cursor-pointer">Privacy Policy</span>
+              <p className="mt-6 text-xs text-content-muted text-center">
+                Access to Ootlah PM is invite-only.
+                <br />
+                Received an invitation link? Open it to create your account.
               </p>
             </div>
           )}
 
-          {/* Demo Credentials */}
-          <div className="mt-4 bg-white rounded-xl border border-slate-200 shadow-card p-4">
-            <div className="flex items-center gap-2 mb-3">
-              <Icon name="KeyIcon" size={14} className="text-brand-orange" />
-              <span className="text-xs font-600 text-slate-700">Demo Credentials</span>
-              <span className="text-[10px] text-slate-400 ml-auto">Click to autofill</span>
-            </div>
-            <div className="space-y-1.5">
-              {DEMO_CREDENTIALS.map(cred => (
-                <div
-                  key={`cred-${cred.role}`}
-                  onClick={() => autofillCredentials(cred.email, cred.password)}
-                  className="flex items-center gap-3 px-3 py-2 rounded-lg bg-slate-50 hover:bg-orange-50 border border-transparent hover:border-brand-orange/30 cursor-pointer transition-all duration-150 group"
-                >
-                  <span className={`text-[10px] font-700 px-2 py-0.5 rounded-full ${
-                    cred.role === 'Admin' ? 'bg-red-100 text-red-600' :
-                    cred.role === 'Team Leader'? 'bg-brand-teal/10 text-brand-teal' : 'bg-slate-200 text-slate-600'
-                  }`}>{cred.role}</span>
-                  <span className="text-xs text-slate-600 flex-1 font-mono">{cred.email}</span>
-                  <Icon name="ArrowRightCircleIcon" size={14} className="text-slate-300 group-hover:text-brand-orange transition-colors" />
+          {mode === 'accept_invite' && (
+            <div className="bg-surface border border-brand-gold/10 rounded-2xl p-8 shadow-xl">
+              <h2 className="text-2xl font-700 text-content-primary mb-2">
+                Accept your invitation
+              </h2>
+
+              {isLoading && !invitation && !inviteError && (
+                <p className="text-content-secondary text-sm">Checking invitation...</p>
+              )}
+
+              {inviteError && (
+                <div className="rounded-lg bg-brand-amber/10 border border-brand-amber/30 text-brand-amber px-4 py-3 text-sm">
+                  {inviteError}
+                  <div className="mt-3">
+                    <button onClick={goToLogin} className="text-brand-gold underline text-sm">
+                      Back to sign in
+                    </button>
+                  </div>
                 </div>
-              ))}
+              )}
+
+              {invitation && (
+                <>
+                  <p className="text-content-secondary text-sm mb-4">
+                    You&apos;ve been invited as{' '}
+                    <span className="text-brand-gold font-600">
+                      {invitation.role === 'admin'
+                        ? 'Admin'
+                        : invitation.role === 'team_leader'
+                          ? 'Team Leader'
+                          : 'Agent'}
+                    </span>
+                    {invitation.department && (
+                      <>
+                        {' '}
+                        in{' '}
+                        <span
+                          className="px-1.5 py-0.5 rounded font-600"
+                          style={{
+                            backgroundColor: `${invitation.department.color}25`,
+                            color: invitation.department.color,
+                          }}
+                        >
+                          {invitation.department.name}
+                        </span>
+                      </>
+                    )}
+                    {invitation.position && (
+                      <>
+                        {' '}
+                        as <span className="text-content-primary">{invitation.position}</span>
+                      </>
+                    )}
+                    .
+                  </p>
+
+                  <form onSubmit={acceptForm.handleSubmit(handleAccept)} className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-600 text-content-primary mb-1.5">
+                        Email
+                      </label>
+                      <input
+                        readOnly
+                        {...acceptForm.register('email')}
+                        className="w-full px-4 py-2.5 rounded-lg bg-surface-dark border border-brand-gold/10 text-content-muted"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-600 text-content-primary mb-1.5">
+                        Full name
+                      </label>
+                      <input
+                        {...acceptForm.register('fullName', { required: 'Full name is required' })}
+                        className="w-full px-4 py-2.5 rounded-lg bg-surface-dark border border-brand-gold/20 text-content-primary focus:outline-none focus:border-brand-gold focus:ring-1 focus:ring-brand-gold"
+                        placeholder="Jane Doe"
+                      />
+                      {acceptForm.formState.errors.fullName && (
+                        <p className="mt-1 text-xs text-brand-amber">
+                          {acceptForm.formState.errors.fullName.message}
+                        </p>
+                      )}
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-600 text-content-primary mb-1.5">
+                        Create a password
+                      </label>
+                      <input
+                        type="password"
+                        {...acceptForm.register('password', {
+                          required: 'Password is required',
+                          minLength: { value: 8, message: 'Minimum 8 characters' },
+                        })}
+                        className="w-full px-4 py-2.5 rounded-lg bg-surface-dark border border-brand-gold/20 text-content-primary focus:outline-none focus:border-brand-gold focus:ring-1 focus:ring-brand-gold"
+                        placeholder="At least 8 characters"
+                      />
+                      {acceptForm.formState.errors.password && (
+                        <p className="mt-1 text-xs text-brand-amber">
+                          {acceptForm.formState.errors.password.message}
+                        </p>
+                      )}
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-600 text-content-primary mb-1.5">
+                        Confirm password
+                      </label>
+                      <input
+                        type="password"
+                        {...acceptForm.register('confirmPassword', {
+                          required: 'Please confirm your password',
+                        })}
+                        className="w-full px-4 py-2.5 rounded-lg bg-surface-dark border border-brand-gold/20 text-content-primary focus:outline-none focus:border-brand-gold focus:ring-1 focus:ring-brand-gold"
+                      />
+                      {acceptForm.formState.errors.confirmPassword && (
+                        <p className="mt-1 text-xs text-brand-amber">
+                          {acceptForm.formState.errors.confirmPassword.message}
+                        </p>
+                      )}
+                    </div>
+
+                    <button
+                      type="submit"
+                      disabled={isLoading}
+                      className="w-full py-2.5 rounded-lg bg-brand-gold text-brand-navy-dark font-700 hover:bg-brand-gold-dark disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    >
+                      {isLoading ? 'Creating account...' : 'Create account'}
+                    </button>
+                  </form>
+
+                  <p className="mt-4 text-center text-xs text-content-muted">
+                    Already have an account?{' '}
+                    <button onClick={goToLogin} className="text-brand-gold underline">
+                      Sign in instead
+                    </button>
+                  </p>
+                </>
+              )}
             </div>
-          </div>
+          )}
         </div>
       </div>
     </div>
+  );
+}
+
+export default function AuthPage() {
+  return (
+    <Suspense fallback={null}>
+      <AuthPageInner />
+    </Suspense>
   );
 }

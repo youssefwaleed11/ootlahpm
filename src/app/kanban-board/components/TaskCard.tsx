@@ -29,19 +29,24 @@ export default function TaskCard({ task, onClick, isSelected, isDragging }: Task
         isSelected
           ? 'border-brand-orange shadow-card-hover ring-2 ring-brand-orange/20'
           : isDragging
-          ? 'border-brand-orange/40 shadow-card-hover'
-          : 'border-slate-200 shadow-card hover:border-brand-orange/30 hover:shadow-card-hover'
+            ? 'border-brand-orange/40 shadow-card-hover'
+            : 'border-slate-200 shadow-card hover:border-brand-orange/30 hover:shadow-card-hover'
       }`}
     >
       <div className="p-3">
         {/* Top row: priority + tags */}
         <div className="flex items-center gap-1.5 mb-2.5">
-          <span className={`inline-flex items-center gap-1 text-[10px] font-600 px-1.5 py-0.5 rounded-full ${priority.className}`}>
+          <span
+            className={`inline-flex items-center gap-1 text-[10px] font-600 px-1.5 py-0.5 rounded-full ${priority.className}`}
+          >
             <span className={`w-1.5 h-1.5 rounded-full ${priority.dot}`} />
             {priority.label}
           </span>
-          {task.tags.slice(0, 2).map(tag => (
-            <span key={`tag-${task.id}-${tag}`} className="text-[10px] font-500 px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-600">
+          {task.tags.slice(0, 2).map((tag) => (
+            <span
+              key={`tag-${task.id}-${tag}`}
+              className="text-[10px] font-500 px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-600"
+            >
               {tag}
             </span>
           ))}
@@ -56,8 +61,14 @@ export default function TaskCard({ task, onClick, isSelected, isDragging }: Task
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             {/* Due date */}
-            <div className={`flex items-center gap-1 text-[11px] font-500 ${overdue ? 'text-red-500' : 'text-slate-500'}`}>
-              <Icon name="CalendarDaysIcon" size={11} className={overdue ? 'text-red-400' : 'text-slate-400'} />
+            <div
+              className={`flex items-center gap-1 text-[11px] font-500 ${overdue ? 'text-red-500' : 'text-slate-500'}`}
+            >
+              <Icon
+                name="CalendarDaysIcon"
+                size={11}
+                className={overdue ? 'text-red-400' : 'text-slate-400'}
+              />
               <span className="font-tabular">{formatDate(task.dueDate)}</span>
               {overdue && <Icon name="ExclamationCircleIcon" size={10} className="text-red-500" />}
             </div>
@@ -93,9 +104,7 @@ export default function TaskCard({ task, onClick, isSelected, isDragging }: Task
       </div>
 
       {/* Overdue stripe */}
-      {overdue && (
-        <div className="h-0.5 bg-gradient-to-r from-red-400 to-red-600 rounded-b-xl" />
-      )}
+      {overdue && <div className="h-0.5 bg-gradient-to-r from-red-400 to-red-600 rounded-b-xl" />}
     </div>
   );
 }

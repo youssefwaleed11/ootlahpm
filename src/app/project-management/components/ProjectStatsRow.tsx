@@ -8,13 +8,15 @@ interface ProjectStatsRowProps {
 }
 
 export default function ProjectStatsRow({ projects }: ProjectStatsRowProps) {
-  const active = projects.filter(p => p.status === 'active').length;
-  const onHold = projects.filter(p => p.status === 'on_hold').length;
-  const archived = projects.filter(p => p.status === 'archived').length;
+  const active = projects.filter((p) => p.status === 'active').length;
+  const onHold = projects.filter((p) => p.status === 'on_hold').length;
+  const archived = projects.filter((p) => p.status === 'archived').length;
   const totalTasks = projects.reduce((sum, p) => sum + p.taskCount, 0);
   const completedTasks = projects.reduce((sum, p) => sum + p.completedTaskCount, 0);
   const overallProgress = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
-  const criticalProjects = projects.filter(p => p.priority === 'critical' && p.status === 'active').length;
+  const criticalProjects = projects.filter(
+    (p) => p.priority === 'critical' && p.status === 'active'
+  ).length;
 
   const stats = [
     {
@@ -76,16 +78,22 @@ export default function ProjectStatsRow({ projects }: ProjectStatsRowProps) {
 
   return (
     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
-      {stats.map(stat => (
+      {stats.map((stat) => (
         <div key={stat.id} className={`bg-white rounded-xl border ${stat.border} shadow-card p-4`}>
           <div className="flex items-start justify-between mb-3">
             <div className={`w-9 h-9 rounded-lg ${stat.bg} flex items-center justify-center`}>
-              <Icon name={stat.icon as Parameters<typeof Icon>[0]['name']} size={18} className={stat.color} />
+              <Icon
+                name={stat.icon as Parameters<typeof Icon>[0]['name']}
+                size={18}
+                className={stat.color}
+              />
             </div>
           </div>
           <p className="text-2xl font-700 text-slate-800 font-tabular">{stat.value}</p>
           <p className="text-xs font-600 text-slate-500 mt-0.5">{stat.label}</p>
-          <p className={`text-[10px] font-500 mt-1.5 ${stat.trendUp ? 'text-emerald-600' : 'text-red-500'}`}>
+          <p
+            className={`text-[10px] font-500 mt-1.5 ${stat.trendUp ? 'text-emerald-600' : 'text-red-500'}`}
+          >
             {stat.trend}
           </p>
         </div>

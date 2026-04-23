@@ -21,7 +21,12 @@ export default function InviteUserModal({ onClose }: InviteUserModalProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [sent, setSent] = useState(false);
 
-  const { register, handleSubmit, formState: { errors }, watch } = useForm<InviteForm>({
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    watch,
+  } = useForm<InviteForm>({
     defaultValues: {
       email: '',
       role: 'agent',
@@ -36,14 +41,15 @@ export default function InviteUserModal({ onClose }: InviteUserModalProps) {
     setIsLoading(true);
     // BACKEND INTEGRATION: Supabase insert invite_tokens table + Resend email with invite link
     // Email contains: workspace name, inviter name, role, join link with token
-    await new Promise(r => setTimeout(r, 1200));
+    await new Promise((r) => setTimeout(r, 1200));
     setIsLoading(false);
     setSent(true);
     toast.success(`Invitation sent to ${data.email}`);
   };
 
   const ROLE_DESCRIPTIONS: Record<UserRole, string> = {
-    admin: 'Full workspace access — can create projects, manage teams, invite users, and delete content',
+    admin:
+      'Full workspace access — can create projects, manage teams, invite users, and delete content',
     team_leader: 'Manages their team, creates and assigns tasks, views all team projects',
     agent: 'Views and works on assigned tasks only — cannot manage team or project settings',
   };
@@ -59,7 +65,10 @@ export default function InviteUserModal({ onClose }: InviteUserModalProps) {
             </div>
             <h2 className="text-base font-700 text-slate-800">Invite Team Member</h2>
           </div>
-          <button onClick={onClose} className="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 transition-colors">
+          <button
+            onClick={onClose}
+            className="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 transition-colors"
+          >
             <Icon name="XMarkIcon" size={18} />
           </button>
         </div>
@@ -70,8 +79,13 @@ export default function InviteUserModal({ onClose }: InviteUserModalProps) {
               <Icon name="CheckCircleIcon" size={28} className="text-emerald-600" />
             </div>
             <h3 className="text-base font-700 text-slate-800 mb-2">Invitation Sent!</h3>
-            <p className="text-sm text-slate-500 mb-1">An email invitation has been sent with a secure join link.</p>
-            <p className="text-xs text-slate-400 mb-6">The user will not be able to access OotlahPM until they click the link and complete registration.</p>
+            <p className="text-sm text-slate-500 mb-1">
+              An email invitation has been sent with a secure join link.
+            </p>
+            <p className="text-xs text-slate-400 mb-6">
+              The user will not be able to access OotlahPM until they click the link and complete
+              registration.
+            </p>
             <button
               onClick={onClose}
               className="px-5 py-2 bg-brand-orange hover:bg-brand-orange-dark text-white text-sm font-600 rounded-lg transition-all duration-150 active:scale-95"
@@ -83,15 +97,23 @@ export default function InviteUserModal({ onClose }: InviteUserModalProps) {
           <form onSubmit={handleSubmit(onSubmit)} className="p-5 space-y-4">
             {/* Admin-only notice */}
             <div className="flex items-start gap-2 bg-blue-50 border border-blue-200 rounded-lg p-3">
-              <Icon name="ShieldCheckIcon" size={14} className="text-blue-600 flex-shrink-0 mt-0.5" />
+              <Icon
+                name="ShieldCheckIcon"
+                size={14}
+                className="text-blue-600 flex-shrink-0 mt-0.5"
+              />
               <p className="text-xs text-blue-700">
-                Only users you invite can join this workspace. The invitation link expires in 48 hours.
+                Only users you invite can join this workspace. The invitation link expires in 48
+                hours.
               </p>
             </div>
 
             {/* Email */}
             <div>
-              <label className="block text-xs font-600 text-slate-700 mb-1.5" htmlFor="invite-email">
+              <label
+                className="block text-xs font-600 text-slate-700 mb-1.5"
+                htmlFor="invite-email"
+              >
                 Email Address <span className="text-red-400">*</span>
               </label>
               <input
@@ -99,7 +121,10 @@ export default function InviteUserModal({ onClose }: InviteUserModalProps) {
                 type="email"
                 placeholder="colleague@company.com"
                 className={`w-full px-3.5 py-2.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-orange/30 focus:border-brand-orange transition-all duration-150 ${errors.email ? 'border-red-400 bg-red-50' : 'border-slate-200 bg-slate-50'}`}
-                {...register('email', { required: 'Email is required', pattern: { value: /^\S+@\S+\.\S+$/, message: 'Enter a valid email' } })}
+                {...register('email', {
+                  required: 'Email is required',
+                  pattern: { value: /^\S+@\S+\.\S+$/, message: 'Enter a valid email' },
+                })}
               />
               {errors.email && (
                 <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
@@ -123,7 +148,9 @@ export default function InviteUserModal({ onClose }: InviteUserModalProps) {
                 <option value="team_leader">Team Leader</option>
                 <option value="admin">Admin</option>
               </select>
-              <p className="text-[11px] text-slate-400 mt-1.5 leading-relaxed">{ROLE_DESCRIPTIONS[selectedRole]}</p>
+              <p className="text-[11px] text-slate-400 mt-1.5 leading-relaxed">
+                {ROLE_DESCRIPTIONS[selectedRole]}
+              </p>
             </div>
 
             {/* Team */}
@@ -136,8 +163,10 @@ export default function InviteUserModal({ onClose }: InviteUserModalProps) {
                 className="w-full px-3.5 py-2.5 text-sm border border-slate-200 bg-slate-50 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-orange/30 focus:border-brand-orange transition-all duration-150 cursor-pointer"
                 {...register('teamId')}
               >
-                {MOCK_TEAMS.map(team => (
-                  <option key={team.id} value={team.id}>{team.name}</option>
+                {MOCK_TEAMS.map((team) => (
+                  <option key={team.id} value={team.id}>
+                    {team.name}
+                  </option>
                 ))}
               </select>
             </div>
@@ -171,9 +200,15 @@ export default function InviteUserModal({ onClose }: InviteUserModalProps) {
                 className="flex-1 py-2.5 bg-brand-orange hover:bg-brand-orange-dark text-white rounded-lg text-sm font-600 transition-all duration-150 active:scale-[0.98] disabled:opacity-70 flex items-center justify-center gap-2"
               >
                 {isLoading ? (
-                  <><Icon name="ArrowPathIcon" size={16} className="animate-spin" />Sending...</>
+                  <>
+                    <Icon name="ArrowPathIcon" size={16} className="animate-spin" />
+                    Sending...
+                  </>
                 ) : (
-                  <><Icon name="PaperAirplaneIcon" size={15} />Send Invitation</>
+                  <>
+                    <Icon name="PaperAirplaneIcon" size={15} />
+                    Send Invitation
+                  </>
                 )}
               </button>
             </div>

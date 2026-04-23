@@ -94,7 +94,10 @@ export default function DepartmentSettingsPage() {
         {/* Departments Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {departments.map((dept) => (
-            <div key={dept.id} className="bg-white rounded-xl border border-slate-200 p-6 hover:shadow-lg transition-shadow">
+            <div
+              key={dept.id}
+              className="bg-white rounded-xl border border-slate-200 p-6 hover:shadow-lg transition-shadow"
+            >
               {/* Header */}
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-3">
@@ -129,7 +132,9 @@ export default function DepartmentSettingsPage() {
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-600 text-slate-600">Monthly Budget</span>
-                  <span className="text-sm font-700 text-slate-900">${dept.budget.toLocaleString()}</span>
+                  <span className="text-sm font-700 text-slate-900">
+                    ${dept.budget.toLocaleString()}
+                  </span>
                 </div>
               </div>
 
@@ -143,8 +148,12 @@ export default function DepartmentSettingsPage() {
 
         {/* Custom Fields Section */}
         <div className="bg-white rounded-xl border border-slate-200 p-6">
-          <h2 className="text-lg font-700 text-slate-900 mb-4 pb-4 border-b border-slate-200">Custom Fields</h2>
-          <p className="text-slate-600 mb-4">Define custom fields for projects and tasks across your organization</p>
+          <h2 className="text-lg font-700 text-slate-900 mb-4 pb-4 border-b border-slate-200">
+            Custom Fields
+          </h2>
+          <p className="text-slate-600 mb-4">
+            Define custom fields for projects and tasks across your organization
+          </p>
 
           <div className="space-y-4">
             {[
@@ -153,10 +162,15 @@ export default function DepartmentSettingsPage() {
               { name: 'Deadline Phase', type: 'Select', departments: 'All' },
               { name: 'Budget Spent', type: 'Number', departments: 'Marketing, Designers' },
             ].map((field, idx) => (
-              <div key={idx} className="flex items-center justify-between p-4 bg-slate-50 rounded-lg border border-slate-200 hover:bg-slate-100 transition-colors">
+              <div
+                key={idx}
+                className="flex items-center justify-between p-4 bg-slate-50 rounded-lg border border-slate-200 hover:bg-slate-100 transition-colors"
+              >
                 <div>
                   <p className="font-600 text-slate-900">{field.name}</p>
-                  <p className="text-xs text-slate-600">{field.type} • {field.departments}</p>
+                  <p className="text-xs text-slate-600">
+                    {field.type} • {field.departments}
+                  </p>
                 </div>
                 <div className="flex items-center gap-2">
                   <button className="p-1.5 hover:bg-white rounded transition-colors">
@@ -183,23 +197,45 @@ export default function DepartmentSettingsPage() {
               <h2 className="text-2xl font-800 text-slate-900 mb-4">Add New Department</h2>
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-600 text-slate-900 mb-2">Department Name</label>
-                  <input type="text" className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500" />
+                  <label className="block text-sm font-600 text-slate-900 mb-2">
+                    Department Name
+                  </label>
+                  <input
+                    type="text"
+                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+                  />
                 </div>
                 <div>
                   <label className="block text-sm font-600 text-slate-900 mb-2">Description</label>
-                  <textarea className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 resize-none" rows={3} />
+                  <textarea
+                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 resize-none"
+                    rows={3}
+                  />
                 </div>
                 <div>
                   <label className="block text-sm font-600 text-slate-900 mb-2">Brand Color</label>
                   <div className="flex gap-2">
-                    <input type="color" defaultValue="#EF4444" className="w-16 h-10 rounded-lg cursor-pointer" />
-                    <input type="text" placeholder="#EF4444" className="flex-1 px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500" />
+                    <input
+                      type="color"
+                      defaultValue="#EF4444"
+                      className="w-16 h-10 rounded-lg cursor-pointer"
+                    />
+                    <input
+                      type="text"
+                      placeholder="#EF4444"
+                      className="flex-1 px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+                    />
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-600 text-slate-900 mb-2">Monthly Budget</label>
-                  <input type="number" placeholder="0" className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500" />
+                  <label className="block text-sm font-600 text-slate-900 mb-2">
+                    Monthly Budget
+                  </label>
+                  <input
+                    type="number"
+                    placeholder="0"
+                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+                  />
                 </div>
               </div>
               <div className="flex gap-3 mt-6">

@@ -52,28 +52,24 @@ export function useComments(taskId: string) {
   };
 
   const addComment = async (content: string, mentions: string[] = []) => {
-    try {
-      const res = await fetch('/api/comments', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          taskId,
-          content,
-          mentions,
-        }),
-      });
+    const res = await fetch('/api/comments', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        taskId,
+        content,
+        mentions,
+      }),
+    });
 
-      const data = await res.json();
+    const data = await res.json();
 
-      if (!res.ok) {
-        throw new Error(data.error || 'Failed to add comment');
-      }
-
-      setComments([...comments, { ...data, attachments: [] }]);
-      return data;
-    } catch (err) {
-      throw err;
+    if (!res.ok) {
+      throw new Error(data.error || 'Failed to add comment');
     }
+
+    setComments([...comments, { ...data, attachments: [] }]);
+    return data;
   };
 
   return {

@@ -10,9 +10,13 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   title: 'Ootlah Project Management System 2026',
-  description: 'Professional project management system for digital marketing agencies. Manage projects, tasks, teams, and portfolios with role-based access and real-time collaboration.',
+  description:
+    'Professional project management system for digital marketing agencies. Manage projects, tasks, teams, and portfolios with role-based access and real-time collaboration.',
   icons: {
-    icon: [{ url: '/favicon.ico', type: 'image/x-icon' }, { url: '/logo.png', type: 'image/png' }],
+    icon: [
+      { url: '/favicon.ico', type: 'image/x-icon' },
+      { url: '/logo.png', type: 'image/png' },
+    ],
   },
 };
 
@@ -23,8 +27,13 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         {children}
         <Toaster position="bottom-right" richColors closeButton />
 
-        <script type="module" async src="https://static.rocket.new/rocket-web.js?_cfg=https%3A%2F%2Footlahpm3241back.builtwithrocket.new&_be=https%3A%2F%2Fappanalytics.rocket.new&_v=0.1.18" />
-        <script type="module" defer src="https://static.rocket.new/rocket-shot.js?v=0.0.2" /></body>
+        <script
+          type="module"
+          async
+          src="https://static.rocket.new/rocket-web.js?_cfg=https%3A%2F%2Footlahpm3241back.builtwithrocket.new&_be=https%3A%2F%2Fappanalytics.rocket.new&_v=0.1.18"
+        />
+        <script type="module" defer src="https://static.rocket.new/rocket-shot.js?v=0.0.2" />
+      </body>
     </html>
   );
 }
