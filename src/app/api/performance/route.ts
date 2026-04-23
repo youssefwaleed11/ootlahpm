@@ -1,10 +1,20 @@
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
-import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
+import { createClient } from '@/lib/supabase/server';
+
+interface DeptRow {
+  id: string;
+  name: string;
+  color: string | null;
+}
+interface TaskSlim {
+  id: string;
+  status: string;
+  assigned_to?: string | null;
+}
 
 export async function GET(request: NextRequest) {
   try {
-    const supabase = createServerComponentClient({ cookies });
+    const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
@@ -33,14 +43,15 @@ export async function GET(request: NextRequest) {
 
     // Get performance data for each department
     const performanceData = await Promise.all(
-      (departments || []).map(async (dept) => {
+      (departments as DeptRow[] | null ?? []).map(async (dept) => {
         const { data: tasks } = await supabase
           .from('tasks')
           .select('id, status, assigned_to')
           .eq('department_id', dept.id);
 
-        const totalTasks = tasks?.length || 0;
-        const completedTasks = tasks?.filter(t => t.status === 'completed').length || 0;
+        const taskList = (tasks as TaskSlim[] | null) ?? [];
+        const totalTasks = taskList.length;
+        const completedTasks = taskList.filter((t) => t.status === 'completed').length;
         const completionRate = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
 
         return {
@@ -63,8 +74,12 @@ export async function GET(request: NextRequest) {
         .select('user_id, users(id, full_name, avatar_url)')
         .eq('department_id', departmentId);
 
+      type EmpRow = {
+        user_id: string;
+        users: { id: string; full_name: string | null; avatar_url: string | null } | null;
+      };
       employeePerformance = await Promise.all(
-        (employees || []).map(async (emp) => {
+        ((employees as EmpRow[] | null) ?? []).map(async (emp) => {
           const userId = emp.user_id;
           const { data: tasks } = await supabase
             .from('tasks')
@@ -72,14 +87,15 @@ export async function GET(request: NextRequest) {
             .eq('assigned_to', userId)
             .eq('department_id', departmentId);
 
-          const totalTasks = tasks?.length || 0;
-          const completedTasks = tasks?.filter(t => t.status === 'completed').length || 0;
+          const taskList = (tasks as TaskSlim[] | null) ?? [];
+          const totalTasks = taskList.length;
+          const completedTasks = taskList.filter((t) => t.status === 'completed').length;
           const completionRate = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
 
           return {
             userId,
-            name: (emp.users as any)?.full_name || 'Unknown',
-            avatar: (emp.users as any)?.avatar_url,
+            name: emp.users?.full_name ?? 'Unknown',
+            avatar: emp.users?.avatar_url ?? null,
             totalTasks,
             completedTasks,
             completionRate,

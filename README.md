@@ -15,30 +15,30 @@ A professional, full-featured project management system built specifically for d
 ## Features
 
 ### Core Management
-- 📊 **Global Dashboard** - Company-wide KPIs, statistics, and performance metrics
-- 🎯 **Task Management** - Full lifecycle management with priority and status tracking
-- 📁 **Project Management** - Portfolio organization by department with progress tracking
-- 💼 **Department System** - Support for 6+ digital marketing departments
-- 👥 **Team Management** - User roles, permissions, and department assignments
+-  **Global Dashboard** - Company-wide KPIs, statistics, and performance metrics
+-  **Task Management** - Full lifecycle management with priority and status tracking
+-  **Project Management** - Portfolio organization by department with progress tracking
+-  **Department System** - Support for 6+ digital marketing departments
+-  **Team Management** - User roles, permissions, and department assignments
 
 ### Collaboration
-- 💬 **Real-time Comments** - Chat on tasks with @mentions
-- 📎 **File Attachments** - Attach documents and assets to tasks
-- 📱 **Responsive Design** - Works on desktop, tablet, and mobile
-- 🔔 **Notifications** - Task assignments and updates
+-  **Real-time Comments** - Chat on tasks with @mentions
+-  **File Attachments** - Attach documents and assets to tasks
+-  **Responsive Design** - Works on desktop, tablet, and mobile
+-  **Notifications** - Task assignments and updates
 
 ### Analytics & Reporting
-- 📈 **Department Performance** - Revenue, efficiency, and productivity metrics
-- 💰 **Budget Tracking** - Monitor department budgets and spending
-- ⏱️ **Time Metrics** - On-time delivery rates and task completion
-- 📊 **Custom Reports** - Financial and operational analytics
+-  **Department Performance** - Revenue, efficiency, and productivity metrics
+-  **Budget Tracking** - Monitor department budgets and spending
+- ️ **Time Metrics** - On-time delivery rates and task completion
+-  **Custom Reports** - Financial and operational analytics
 
 ### Advanced Features
-- 🔍 **Advanced Filtering** - Multi-select filters with save presets
-- 🎨 **Custom Fields** - Extensible schema for organization-specific data
-- 🔐 **Role-Based Access** - Admin, Manager, Department Head, Team Member
-- 📜 **Audit Logging** - Full compliance and activity tracking
-- 🌓 **Theme Support** - Light/Dark mode preferences
+-  **Advanced Filtering** - Multi-select filters with save presets
+-  **Custom Fields** - Extensible schema for organization-specific data
+-  **Role-Based Access** - Admin, Manager, Department Head, Team Member
+-  **Audit Logging** - Full compliance and activity tracking
+-  **Theme Support** - Light/Dark mode preferences
 
 ## Supported Departments
 
@@ -104,45 +104,45 @@ Open [http://localhost:4028](http://localhost:4028) in your browser.
 
 ```
 ootlahpm/
-├── public/                    # Static assets
-│   ├── logo.png              # Ootlah brand logo
-│   └── favicon.ico           # Website favicon
-├── scripts/
-│   └── 01_create_schema.sql  # Database migration
-├── src/
-│   ├── app/                  # Next.js pages
-│   │   ├── dashboard/        # Main dashboard
-│   │   ├── portfolios/       # Project portfolios
-│   │   ├── reporting/        # Analytics & reporting
-│   │   ├── my-tasks/         # Personal task list
-│   │   ├── my-projects/      # User's projects
-│   │   ├── settings/         # User settings
-│   │   ├── admin/            # Admin section
-│   │   │   ├── users/        # User management
-│   │   │   └── departments/  # Department settings
-│   │   └── sign-up-login-screen/ # Authentication
-│   ├── components/           # Reusable React components
-│   │   ├── Sidebar.tsx       # Main navigation
-│   │   ├── AppLayout.tsx     # Main layout wrapper
-│   │   ├── TaskDetailPanel.tsx # Task chat interface
-│   │   ├── AdvancedFilters.tsx # Filter system
-│   │   └── ui/               # UI primitives
-│   ├── lib/
-│   │   ├── supabase/         # Database clients
-│   │   │   ├── client.ts     # Browser client
-│   │   │   ├── server.ts     # Server client
-│   │   │   └── queries.ts    # Database operations
-│   │   ├── mockData.ts       # Demo data
-│   │   └── types/
-│   │       └── database.ts   # Type definitions
-│   └── styles/
-│       └── tailwind.css      # Global styles
-├── tailwind.config.js        # Tailwind configuration
-├── tsconfig.json             # TypeScript config
-├── package.json              # Dependencies
-├── SETUP_GUIDE.md            # Detailed setup instructions
-├── IMPLEMENTATION_SUMMARY.md # Technical details
-└── README.md                 # This file
+ public/                    # Static assets
+    logo.png              # Ootlah brand logo
+    favicon.ico           # Website favicon
+ scripts/
+    01_create_schema.sql  # Database migration
+ src/
+    app/                  # Next.js pages
+       dashboard/        # Main dashboard
+       portfolios/       # Project portfolios
+       reporting/        # Analytics & reporting
+       my-tasks/         # Personal task list
+       my-projects/      # User's projects
+       settings/         # User settings
+       admin/            # Admin section
+          users/        # User management
+          departments/  # Department settings
+       sign-up-login-screen/ # Authentication
+    components/           # Reusable React components
+       Sidebar.tsx       # Main navigation
+       AppLayout.tsx     # Main layout wrapper
+       TaskDetailPanel.tsx # Task chat interface
+       AdvancedFilters.tsx # Filter system
+       ui/               # UI primitives
+    lib/
+       supabase/         # Database clients
+          client.ts     # Browser client
+          server.ts     # Server client
+          queries.ts    # Database operations
+       mockData.ts       # Demo data
+       types/
+           database.ts   # Type definitions
+    styles/
+        tailwind.css      # Global styles
+ tailwind.config.js        # Tailwind configuration
+ tsconfig.json             # TypeScript config
+ package.json              # Dependencies
+ SETUP_GUIDE.md            # Detailed setup instructions
+ IMPLEMENTATION_SUMMARY.md # Technical details
+ README.md                 # This file
 ```
 
 ## Database Schema
@@ -151,15 +151,15 @@ ootlahpm/
 
 ```
 organizations (1) ← → (Many) departments, users, projects, tasks
-    ├── departments (1) ← → (Many) projects, users
-    ├── users (1) ← → (Many) tasks, comments
-    ├── projects (1) ← → (Many) tasks
-    ├── tasks (1) ← → (Many) comments, attachments
-    ├── task_comments (1) ← → (Many) attachments
-    ├── custom_fields (1) ← → (Many) task values
-    ├── saved_filters
-    ├── department_members
-    └── audit_logs
+     departments (1) ← → (Many) projects, users
+     users (1) ← → (Many) tasks, comments
+     projects (1) ← → (Many) tasks
+     tasks (1) ← → (Many) comments, attachments
+     task_comments (1) ← → (Many) attachments
+     custom_fields (1) ← → (Many) task values
+     saved_filters
+     department_members
+     audit_logs
 ```
 
 **[View full schema](./scripts/01_create_schema.sql)**
@@ -205,12 +205,12 @@ Team Member:  nour@ootlah.com / Agent@2026
 
 ## Security Features
 
-✅ Row Level Security (RLS) on all tables  
-✅ Organization data isolation  
-✅ Role-based access control  
-✅ Audit logging for compliance  
-✅ Secure file upload handling  
-✅ HTTPS only in production  
+ Row Level Security (RLS) on all tables  
+ Organization data isolation  
+ Role-based access control  
+ Audit logging for compliance  
+ Secure file upload handling  
+ HTTPS only in production  
 
 ## Available Scripts
 
@@ -248,7 +248,7 @@ For setup help, see **[SETUP_GUIDE.md](./SETUP_GUIDE.md)** for detailed instruct
 
 <div align="center">
 
-**Built with ❤️ for digital marketing teams**
+**Built with ️ for digital marketing teams**
 
 Version 2026.1.0 • April 22, 2026
 

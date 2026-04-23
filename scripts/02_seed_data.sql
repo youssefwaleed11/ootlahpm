@@ -12,18 +12,19 @@ VALUES (
   'ootlah',
   '/logo.png',
   '/favicon.ico',
-  '#EF4444'
+  '#ecd862'
 );
 
--- 2. Create Departments
+-- 2. Create Departments (gold brand palette)
 INSERT INTO departments (organization_id, name, slug, description, color, icon)
 VALUES
-  ('550e8400-e29b-41d4-a716-446655440000'::uuid, 'Marketing', 'marketing', 'Paid ads and campaigns', '#EF4444', 'target'),
-  ('550e8400-e29b-41d4-a716-446655440000'::uuid, 'SEO', 'seo', 'Search engine optimization', '#F97316', 'search'),
-  ('550e8400-e29b-41d4-a716-446655440000'::uuid, 'Content', 'content', 'Content creation and copywriting', '#EAB308', 'document'),
-  ('550e8400-e29b-41d4-a716-446655440000'::uuid, 'BD', 'bd', 'Business development', '#10B981', 'handshake'),
-  ('550e8400-e29b-41d4-a716-446655440000'::uuid, 'Designers', 'designers', 'UI/UX and graphic design', '#3B82F6', 'palette'),
-  ('550e8400-e29b-41d4-a716-446655440000'::uuid, 'Social Media', 'social-media', 'Social media management', '#8B5CF6', 'share2');
+  ('550e8400-e29b-41d4-a716-446655440000'::uuid, 'Marketing',    'marketing',    'Paid ads and campaigns',             '#ecd862', 'megaphone'),
+  ('550e8400-e29b-41d4-a716-446655440000'::uuid, 'SEO',          'seo',          'Search engine optimization',         '#f2cb50', 'magnifying-glass'),
+  ('550e8400-e29b-41d4-a716-446655440000'::uuid, 'Content',      'content',      'Content creation and copywriting',   '#ddab33', 'document-text'),
+  ('550e8400-e29b-41d4-a716-446655440000'::uuid, 'BD',           'bd',           'Business development',               '#c3802d', 'briefcase'),
+  ('550e8400-e29b-41d4-a716-446655440000'::uuid, 'Designers',    'designers',    'UI/UX and graphic design',           '#a3671d', 'paint-brush'),
+  ('550e8400-e29b-41d4-a716-446655440000'::uuid, 'Social Media', 'social-media', 'Social media management',            '#ecd862', 'hashtag'),
+  ('550e8400-e29b-41d4-a716-446655440000'::uuid, 'Media Buying', 'media-buying', 'Paid media strategy and ad spend',   '#c3802d', 'chart-bar');
 
 -- Get department IDs for use in the rest of the script
 -- Marketing: dept_marketing_id

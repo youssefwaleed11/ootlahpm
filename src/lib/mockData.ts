@@ -144,7 +144,7 @@ export const MOCK_MESSAGES: Message[] = [
   { id: 'msg-001', channelId: 'team-001', userId: 'user-002', content: 'Morning team! Quick reminder — design review for the mobile app is at 3pm today. Please have your screens ready.', createdAt: '2026-04-21T08:00:00Z', isRead: true },
   { id: 'msg-002', channelId: 'team-001', userId: 'user-003', content: 'Got it! I\'ll have the onboarding flow screens ready. Just finishing up the last two states.', createdAt: '2026-04-21T08:15:00Z', isRead: true },
   { id: 'msg-003', channelId: 'team-001', userId: 'user-004', content: 'Dark mode tokens are all done — pushed to Figma. Let me know if the naming convention looks off.', createdAt: '2026-04-21T09:00:00Z', isRead: true },
-  { id: 'msg-004', channelId: 'team-001', userId: 'user-008', content: 'App store screenshots are looking great. Using the new brand colors and it pops 🔥', createdAt: '2026-04-21T10:30:00Z', isRead: false },
+  { id: 'msg-004', channelId: 'team-001', userId: 'user-008', content: 'App store screenshots are looking great. Using the new brand colors and they pop.', createdAt: '2026-04-21T10:30:00Z', isRead: false },
   { id: 'msg-005', channelId: 'team-001', userId: 'user-002', content: 'Nice work Ziad! Make sure we have both light and dark versions for the Play Store.', createdAt: '2026-04-21T11:00:00Z', isRead: false },
   { id: 'msg-006', channelId: 'team-002', userId: 'user-005', content: 'Rate limiting PR is up for review. @Rima please take a look when you get a chance.', createdAt: '2026-04-21T09:30:00Z', isRead: true },
   { id: 'msg-007', channelId: 'team-002', userId: 'user-007', content: 'On it! Will review before lunch.', createdAt: '2026-04-21T09:45:00Z', isRead: true },

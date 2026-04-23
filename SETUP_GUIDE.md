@@ -1,6 +1,6 @@
 # Ootlah PM 2026 - Setup & Deployment Guide
 
-## 🚀 Quick Start
+##  Quick Start
 
 ### Prerequisites
 - Node.js 18+ (Already installed in v0)
@@ -41,7 +41,7 @@ pnpm dev
 ```
 Server runs on http://localhost:4028
 
-## 📊 Database Setup Details
+##  Database Setup Details
 
 ### Running the SQL Schema
 
@@ -74,7 +74,7 @@ SELECT id, 'Marketing', 'marketing', '#EF4444'
 FROM organizations WHERE slug = 'ootlah';
 ```
 
-## 🔑 Authentication Setup
+##  Authentication Setup
 
 ### Supabase Auth
 
@@ -99,7 +99,7 @@ NEXT_PUBLIC_SUPABASE_URL=your-url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 ```
 
-## 📱 Feature Configuration
+##  Feature Configuration
 
 ### Departments Setup
 
@@ -145,51 +145,51 @@ Example fields to add:
 - **Campaign Duration** (Select): Q1, Q2, Q3, Q4
 - **Budget Spent** (Number): Track spending
 
-## 🏗️ Project Structure
+## ️ Project Structure
 
 ```
 ootlahpm/
-├── public/
-│   ├── logo.png (Your Ootlah logo)
-│   └── favicon.ico
-├── scripts/
-│   └── 01_create_schema.sql (Database setup)
-├── src/
-│   ├── app/
-│   │   ├── layout.tsx
-│   │   ├── dashboard/ (Main dashboard)
-│   │   ├── portfolios/ (Project portfolios)
-│   │   ├── reporting/ (Analytics)
-│   │   ├── my-tasks/ (Personal tasks)
-│   │   ├── my-projects/ (User projects)
-│   │   ├── settings/ (User settings)
-│   │   ├── admin/ (Admin pages)
-│   │   │   ├── users/ (User management)
-│   │   │   └── departments/ (Department settings)
-│   │   └── sign-up-login-screen/ (Auth)
-│   ├── components/
-│   │   ├── Sidebar.tsx (Navigation)
-│   │   ├── AppLayout.tsx (Main layout)
-│   │   ├── TaskDetailPanel.tsx (Task chat)
-│   │   ├── AdvancedFilters.tsx (Filtering)
-│   │   └── ui/ (Reusable components)
-│   ├── lib/
-│   │   ├── supabase/
-│   │   │   ├── client.ts
-│   │   │   ├── server.ts
-│   │   │   └── queries.ts
-│   │   ├── mockData.ts
-│   │   └── types/
-│   │       └── database.ts
-│   └── styles/
-├── tailwind.config.js
-├── package.json
-├── IMPLEMENTATION_SUMMARY.md
-├── SETUP_GUIDE.md (this file)
-└── README.md
+ public/
+    logo.png (Your Ootlah logo)
+    favicon.ico
+ scripts/
+    01_create_schema.sql (Database setup)
+ src/
+    app/
+       layout.tsx
+       dashboard/ (Main dashboard)
+       portfolios/ (Project portfolios)
+       reporting/ (Analytics)
+       my-tasks/ (Personal tasks)
+       my-projects/ (User projects)
+       settings/ (User settings)
+       admin/ (Admin pages)
+          users/ (User management)
+          departments/ (Department settings)
+       sign-up-login-screen/ (Auth)
+    components/
+       Sidebar.tsx (Navigation)
+       AppLayout.tsx (Main layout)
+       TaskDetailPanel.tsx (Task chat)
+       AdvancedFilters.tsx (Filtering)
+       ui/ (Reusable components)
+    lib/
+       supabase/
+          client.ts
+          server.ts
+          queries.ts
+       mockData.ts
+       types/
+           database.ts
+    styles/
+ tailwind.config.js
+ package.json
+ IMPLEMENTATION_SUMMARY.md
+ SETUP_GUIDE.md (this file)
+ README.md
 ```
 
-## 🔐 Security & RLS Policies
+##  Security & RLS Policies
 
 ### What Gets Protected
 
@@ -225,7 +225,7 @@ SELECT * FROM tasks
 WHERE organization_id = (SELECT id FROM organizations LIMIT 1);
 ```
 
-## 🌐 Deployment
+##  Deployment
 
 ### Deploy to Vercel
 
@@ -249,7 +249,7 @@ NEXT_PUBLIC_SUPABASE_URL=your-production-url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-production-key
 ```
 
-## 📋 Usage Guide
+##  Usage Guide
 
 ### For Admin Users
 
@@ -308,7 +308,7 @@ Everything team members can do, PLUS:
    - Track individual productivity
    - Monitor project profitability
 
-## 🐛 Troubleshooting
+##  Troubleshooting
 
 ### Database Connection Issues
 
@@ -343,7 +343,7 @@ WHERE email = 'user@example.com';
 **Problem**: Logo not showing
 - **Solution**: Ensure `/public/logo.png` exists and is valid PNG
 
-## 📈 Performance Optimization
+##  Performance Optimization
 
 ### Current Optimizations
 
@@ -370,7 +370,7 @@ SELECT * FROM tasks WHERE assigned_to = 'user-id';
 
 3. **Image Optimization**: Use Next.js Image component
 
-## 🎓 Learning Resources
+##  Learning Resources
 
 ### For Your Team
 
@@ -388,7 +388,7 @@ All database operations are in `src/lib/supabase/queries.ts`:
 - `createTask(taskData)`
 - And many more...
 
-## 🔄 Maintenance
+##  Maintenance
 
 ### Regular Tasks
 
@@ -406,7 +406,7 @@ All database operations are in `src/lib/supabase/queries.ts`:
    - Optimize slow queries
    - Update dependencies
 
-## 💡 Next Steps
+##  Next Steps
 
 1. **Connect Supabase**: Follow Database Setup section above
 2. **Seed Initial Data**: Add your departments and team members
@@ -415,7 +415,7 @@ All database operations are in `src/lib/supabase/queries.ts`:
 5. **Invite Team Members**: Via `/admin/users` → "Add User"
 6. **Deploy**: Push to GitHub and deploy to Vercel
 
-## 📞 Support
+##  Support
 
 For issues or questions:
 1. Check Supabase logs: Project → Logs

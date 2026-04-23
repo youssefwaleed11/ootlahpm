@@ -3,94 +3,73 @@ import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
-import AppLogo from '@/components/ui/AppLogo';
-import AppImage from '@/components/ui/AppImage';
 import Icon from '@/components/ui/AppIcon';
 
-type LoginForm = { email: string; password: string; remember: boolean };
-type SignupForm = { name: string; email: string; password: string; confirmPassword: string };
-
-const DEMO_CREDENTIALS = [
-  { role: 'Admin', email: 'layla@ootlah.com', password: 'Admin@2026' },
-  { role: 'Team Leader', email: 'omar@ootlah.com', password: 'Leader@2026' },
-  { role: 'Agent', email: 'nour@ootlah.com', password: 'Agent@2026' },
-];
+type LoginForm = { email: string; password: string };
 
 export default function AuthPage() {
-  const [tab, setTab] = useState<'login' | 'signup'>('login');
   const [showPassword, setShowPassword] = useState(false);
-  const [showConfirm, setShowConfirm] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
-  const loginForm = useForm<LoginForm>({ defaultValues: { email: '', password: '', remember: false } });
-  const signupForm = useForm<SignupForm>({ defaultValues: { name: '', email: '', password: '', confirmPassword: '' } });
+  const { register, handleSubmit, formState: { errors }, setError } = useForm<LoginForm>({
+    defaultValues: { email: '', password: '' },
+  });
 
-  const handleLoginSubmit = async (data: LoginForm) => {
+  const onSubmit = async (data: LoginForm) => {
     setIsLoading(true);
-    // BACKEND INTEGRATION: Supabase auth.signInWithPassword({ email, password })
-    await new Promise(r => setTimeout(r, 1200));
-    const valid = DEMO_CREDENTIALS.find(c => c.email === data.email && c.password === data.password);
-    if (!valid) {
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      const payload = await res.json();
+      if (!res.ok) {
+        setError('email', { message: payload.error || 'Sign in failed' });
+        return;
+      }
+      toast.success(`Welcome back, ${payload.user?.full_name || payload.user?.email}.`);
+      router.push('/dashboard');
+    } catch {
+      setError('email', { message: 'Network error. Please try again.' });
+    } finally {
       setIsLoading(false);
-      loginForm.setError('email', { message: 'Invalid credentials — use the demo accounts below to sign in' });
-      return;
     }
-    toast.success(`Welcome back! Signed in as ${valid.role}.`);
-    router.push('/kanban-board');
-  };
-
-  const handleSignupSubmit = async (data: SignupForm) => {
-    if (data.password !== data.confirmPassword) {
-      signupForm.setError('confirmPassword', { message: 'Passwords do not match' });
-      return;
-    }
-    setIsLoading(true);
-    // BACKEND INTEGRATION: Supabase auth.signUp() + check invite_tokens table for valid invite
-    await new Promise(r => setTimeout(r, 1200));
-    setIsLoading(false);
-    toast.error('Sign-up requires an admin invitation. Contact your workspace admin.');
-  };
-
-  const autofillCredentials = (email: string, password: string) => {
-    loginForm.setValue('email', email);
-    loginForm.setValue('password', password);
-    setTab('login');
-    toast.info('Credentials filled — click Sign In to continue.');
   };
 
   return (
-    <div className="min-h-screen flex">
-      {/* Left panel — brand */}
-      <div className="hidden lg:flex lg:w-1/2 xl:w-[55%] relative flex-col items-center justify-center overflow-hidden"
-        style={{ background: 'linear-gradient(135deg, #1E293B 0%, #0F172A 60%, #1a3a4a 100%)' }}>
-        {/* Decorative circles */}
-        <div className="absolute top-[-80px] right-[-80px] w-96 h-96 rounded-full opacity-10" style={{ background: 'radial-gradient(circle, #F97316 0%, transparent 70%)' }} />
-        <div className="absolute bottom-[-60px] left-[-60px] w-72 h-72 rounded-full opacity-10" style={{ background: 'radial-gradient(circle, #0D9488 0%, transparent 70%)' }} />
+    <div className="min-h-screen flex bg-[#0f0b05] text-[#f0ddb0]">
+      {/* Left brand panel */}
+      <div
+        className="hidden lg:flex lg:w-1/2 xl:w-[55%] relative flex-col items-center justify-center overflow-hidden"
+        style={{ background: 'linear-gradient(135deg, #1e1508 0%, #0f0b05 70%, #2e200e 100%)' }}
+      >
+        <div
+          className="absolute top-[-80px] right-[-80px] w-96 h-96 rounded-full opacity-15"
+          style={{ background: 'radial-gradient(circle, #ecd862 0%, transparent 70%)' }}
+        />
+        <div
+          className="absolute bottom-[-60px] left-[-60px] w-72 h-72 rounded-full opacity-15"
+          style={{ background: 'radial-gradient(circle, #c3802d 0%, transparent 70%)' }}
+        />
 
         <div className="relative z-10 flex flex-col items-center text-center max-w-md px-8">
-          <div className="flex items-center gap-3 mb-10">
-            <img src="/logo.png" alt="Ootlah" className="w-12 h-12 rounded" />
-          </div>
+          <img src="/logo.png" alt="Ootlah" className="h-16 mb-8" />
 
-          <h1 className="text-3xl font-800 text-white mb-2 leading-tight">
-            Ootlah Project Management System 2026
+          <h1 className="text-3xl font-800 text-[#f0ddb0] mb-2 leading-tight">
+            Ootlah Project Management
           </h1>
+          <p className="text-[#c4a46b] text-sm mb-8">
+            Access is by invitation only. If you do not have an invite, contact your workspace admin.
+          </p>
 
-          <div className="w-full rounded-2xl overflow-hidden shadow-2xl my-8 border border-white/10">
-            <AppImage
-              src="/assets/images/imgi_1_default-1776780049095.png"
-              alt="Ootlah Project Management System dashboard showing task management"
-              width={560}
-              height={320}
-              className="w-full object-cover"
-            />
-          </div>
-
-          {/* Feature pills */}
           <div className="flex flex-wrap justify-center gap-2">
-            {['Projects', 'Tasks', 'Team Chat', 'Portfolios', 'Analytics'].map(f => (
-              <span key={`feat-${f}`} className="text-xs px-3 py-1.5 rounded-full border border-white/20 text-slate-300 bg-white/5">
+            {['Projects', 'Tasks', 'Team Chat', 'Portfolios', 'Analytics'].map((f) => (
+              <span
+                key={`feat-${f}`}
+                className="text-xs px-3 py-1.5 rounded-full border border-[#a3671d]/40 text-[#c4a46b] bg-[#1e1508]/50"
+              >
                 {f}
               </span>
             ))}
@@ -98,268 +77,87 @@ export default function AuthPage() {
         </div>
       </div>
 
-      {/* Right panel — form */}
-      <div className="flex-1 flex flex-col items-center justify-center px-6 py-10 bg-slate-50">
-        {/* Mobile logo */}
+      {/* Right form panel */}
+      <div className="flex-1 flex flex-col items-center justify-center px-6 py-10 bg-[#0f0b05]">
         <div className="lg:hidden flex items-center gap-2 mb-8">
-          <img src="/logo.png" alt="Ootlah" className="w-10 h-10 rounded" />
-          <span className="text-slate-800 text-lg font-700">Ootlah PM</span>
+          <img src="/logo.png" alt="Ootlah" className="h-10" />
         </div>
 
         <div className="w-full max-w-md">
-          {/* Tabs */}
-          <div className="flex bg-white rounded-xl border border-slate-200 p-1 mb-6 shadow-card">
-            {(['login', 'signup'] as const).map(t => (
-              <button
-                key={`tab-${t}`}
-                onClick={() => setTab(t)}
-                className={`flex-1 py-2 text-sm font-600 rounded-lg transition-all duration-200 ${
-                  tab === t
-                    ? 'bg-brand-orange text-white shadow-sm'
-                    : 'text-slate-500 hover:text-slate-700'
+          <h2 className="text-2xl font-800 text-[#f0ddb0] mb-2">Sign in to Ootlah</h2>
+          <p className="text-[#7a5e35] text-sm mb-8">
+            Enter the email address your admin invited. Sign-ups without an invitation are rejected.
+          </p>
+
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+            <div>
+              <label htmlFor="email" className="block text-xs font-600 text-[#c4a46b] mb-1.5">
+                Work email
+              </label>
+              <input
+                id="email"
+                type="email"
+                placeholder="you@company.com"
+                className={`w-full px-3.5 py-2.5 text-sm rounded-lg bg-[#1e1508] text-[#f0ddb0] placeholder-[#7a5e35] border transition-all focus:outline-none focus:ring-2 focus:ring-[#ecd862]/40 ${
+                  errors.email ? 'border-[#c3802d]' : 'border-[#a3671d]/30 focus:border-[#ecd862]'
                 }`}
-              >
-                {t === 'login' ? 'Sign In' : 'Sign Up'}
-              </button>
-            ))}
-          </div>
-
-          {/* Login Form */}
-          {tab === 'login' && (
-            <div className="bg-white rounded-2xl border border-slate-200 shadow-card p-6 fade-in">
-              <h2 className="text-lg font-700 text-slate-800 mb-1">Welcome back</h2>
-              <p className="text-sm text-slate-500 mb-5">Sign in to your OotlahPM workspace</p>
-
-              <form onSubmit={loginForm.handleSubmit(handleLoginSubmit)} className="space-y-4">
-                <div>
-                  <label className="block text-xs font-600 text-slate-700 mb-1.5" htmlFor="login-email">
-                    Work Email
-                  </label>
-                  <input
-                    id="login-email"
-                    type="email"
-                    placeholder="you@company.com"
-                    className={`w-full px-3.5 py-2.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-orange/30 focus:border-brand-orange transition-all duration-150 ${loginForm.formState.errors.email ? 'border-red-400 bg-red-50' : 'border-slate-200 bg-slate-50'}`}
-                    {...loginForm.register('email', { required: 'Email is required', pattern: { value: /^\S+@\S+\.\S+$/, message: 'Enter a valid email' } })}
-                  />
-                  {loginForm.formState.errors.email && (
-                    <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
-                      <Icon name="ExclamationCircleIcon" size={12} />
-                      {loginForm.formState.errors.email.message}
-                    </p>
-                  )}
-                </div>
-
-                <div>
-                  <div className="flex items-center justify-between mb-1.5">
-                    <label className="text-xs font-600 text-slate-700" htmlFor="login-password">Password</label>
-                    <span className="text-xs text-brand-orange hover:underline cursor-pointer font-500">Forgot password?</span>
-                  </div>
-                  <div className="relative">
-                    <input
-                      id="login-password"
-                      type={showPassword ? 'text' : 'password'}
-                      placeholder="••••••••"
-                      className={`w-full px-3.5 py-2.5 pr-10 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-orange/30 focus:border-brand-orange transition-all duration-150 ${loginForm.formState.errors.password ? 'border-red-400 bg-red-50' : 'border-slate-200 bg-slate-50'}`}
-                      {...loginForm.register('password', { required: 'Password is required', minLength: { value: 6, message: 'Minimum 6 characters' } })}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
-                    >
-                      <Icon name={showPassword ? 'EyeSlashIcon' : 'EyeIcon'} size={16} />
-                    </button>
-                  </div>
-                  {loginForm.formState.errors.password && (
-                    <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
-                      <Icon name="ExclamationCircleIcon" size={12} />
-                      {loginForm.formState.errors.password.message}
-                    </p>
-                  )}
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <input
-                    id="remember"
-                    type="checkbox"
-                    className="w-3.5 h-3.5 accent-brand-orange"
-                    {...loginForm.register('remember')}
-                  />
-                  <label htmlFor="remember" className="text-xs text-slate-600 cursor-pointer">Keep me signed in</label>
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={isLoading}
-                  className="w-full py-2.5 rounded-lg bg-brand-orange hover:bg-brand-orange-dark text-white text-sm font-600 transition-all duration-150 active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                >
-                  {isLoading ? (
-                    <>
-                      <Icon name="ArrowPathIcon" size={16} className="animate-spin" />
-                      Signing in...
-                    </>
-                  ) : 'Sign In'}
-                </button>
-              </form>
-
-              {/* Divider */}
-              <div className="flex items-center gap-3 my-4">
-                <div className="flex-1 h-px bg-slate-200" />
-                <span className="text-xs text-slate-400">or continue with</span>
-                <div className="flex-1 h-px bg-slate-200" />
-              </div>
-
-              {/* Social */}
-              <div className="grid grid-cols-2 gap-2">
-                {[{ label: 'Google', icon: 'GlobeAltIcon' }, { label: 'GitHub', icon: 'CodeBracketIcon' }].map(s => (
-                  <button
-                    key={`social-${s.label}`}
-                    className="flex items-center justify-center gap-2 py-2 border border-slate-200 rounded-lg text-sm text-slate-600 font-500 hover:bg-slate-50 hover:border-slate-300 transition-all duration-150"
-                    onClick={() => toast.info(`${s.label} OAuth — connect Supabase OAuth provider`)}
-                  >
-                    <Icon name={s.icon as Parameters<typeof Icon>[0]['name']} size={16} />
-                    {s.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Signup Form */}
-          {tab === 'signup' && (
-            <div className="bg-white rounded-2xl border border-slate-200 shadow-card p-6 fade-in">
-              <h2 className="text-lg font-700 text-slate-800 mb-1">Create your account</h2>
-              <div className="flex items-start gap-2 bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4">
-                <Icon name="ShieldExclamationIcon" size={16} className="text-amber-600 flex-shrink-0 mt-0.5" />
-                <p className="text-xs text-amber-700 leading-relaxed">
-                  <strong>Invite-only access.</strong> You must be invited by a workspace admin before you can create an account. Check your email for an invitation link.
+                autoComplete="email"
+                {...register('email', {
+                  required: 'Email is required',
+                  pattern: { value: /^\S+@\S+\.\S+$/, message: 'Enter a valid email' },
+                })}
+              />
+              {errors.email && (
+                <p className="text-[#f2cb50] text-xs mt-1.5 flex items-center gap-1">
+                  <Icon name="ExclamationCircleIcon" size={12} />
+                  {errors.email.message}
                 </p>
-              </div>
+              )}
+            </div>
 
-              <form onSubmit={signupForm.handleSubmit(handleSignupSubmit)} className="space-y-4">
-                <div>
-                  <label className="block text-xs font-600 text-slate-700 mb-1.5" htmlFor="signup-name">Full Name</label>
-                  <input
-                    id="signup-name"
-                    type="text"
-                    placeholder="Layla Al-Rashidi"
-                    className={`w-full px-3.5 py-2.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-orange/30 focus:border-brand-orange transition-all duration-150 ${signupForm.formState.errors.name ? 'border-red-400 bg-red-50' : 'border-slate-200 bg-slate-50'}`}
-                    {...signupForm.register('name', { required: 'Full name is required', minLength: { value: 2, message: 'Name must be at least 2 characters' } })}
-                  />
-                  {signupForm.formState.errors.name && (
-                    <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
-                      <Icon name="ExclamationCircleIcon" size={12} />
-                      {signupForm.formState.errors.name.message}
-                    </p>
-                  )}
-                </div>
-
-                <div>
-                  <label className="block text-xs font-600 text-slate-700 mb-1.5" htmlFor="signup-email">Work Email</label>
-                  <p className="text-[11px] text-slate-400 mb-1.5">Must match the email your admin used to invite you</p>
-                  <input
-                    id="signup-email"
-                    type="email"
-                    placeholder="you@company.com"
-                    className={`w-full px-3.5 py-2.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-orange/30 focus:border-brand-orange transition-all duration-150 ${signupForm.formState.errors.email ? 'border-red-400 bg-red-50' : 'border-slate-200 bg-slate-50'}`}
-                    {...signupForm.register('email', { required: 'Email is required', pattern: { value: /^\S+@\S+\.\S+$/, message: 'Enter a valid email' } })}
-                  />
-                  {signupForm.formState.errors.email && (
-                    <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
-                      <Icon name="ExclamationCircleIcon" size={12} />
-                      {signupForm.formState.errors.email.message}
-                    </p>
-                  )}
-                </div>
-
-                <div>
-                  <label className="block text-xs font-600 text-slate-700 mb-1.5" htmlFor="signup-password">Password</label>
-                  <div className="relative">
-                    <input
-                      id="signup-password"
-                      type={showPassword ? 'text' : 'password'}
-                      placeholder="Min. 8 characters"
-                      className={`w-full px-3.5 py-2.5 pr-10 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-orange/30 focus:border-brand-orange transition-all duration-150 ${signupForm.formState.errors.password ? 'border-red-400 bg-red-50' : 'border-slate-200 bg-slate-50'}`}
-                      {...signupForm.register('password', { required: 'Password is required', minLength: { value: 8, message: 'Minimum 8 characters' } })}
-                    />
-                    <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors">
-                      <Icon name={showPassword ? 'EyeSlashIcon' : 'EyeIcon'} size={16} />
-                    </button>
-                  </div>
-                  {signupForm.formState.errors.password && (
-                    <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
-                      <Icon name="ExclamationCircleIcon" size={12} />
-                      {signupForm.formState.errors.password.message}
-                    </p>
-                  )}
-                </div>
-
-                <div>
-                  <label className="block text-xs font-600 text-slate-700 mb-1.5" htmlFor="signup-confirm">Confirm Password</label>
-                  <div className="relative">
-                    <input
-                      id="signup-confirm"
-                      type={showConfirm ? 'text' : 'password'}
-                      placeholder="Re-enter your password"
-                      className={`w-full px-3.5 py-2.5 pr-10 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-orange/30 focus:border-brand-orange transition-all duration-150 ${signupForm.formState.errors.confirmPassword ? 'border-red-400 bg-red-50' : 'border-slate-200 bg-slate-50'}`}
-                      {...signupForm.register('confirmPassword', { required: 'Please confirm your password' })}
-                    />
-                    <button type="button" onClick={() => setShowConfirm(!showConfirm)} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors">
-                      <Icon name={showConfirm ? 'EyeSlashIcon' : 'EyeIcon'} size={16} />
-                    </button>
-                  </div>
-                  {signupForm.formState.errors.confirmPassword && (
-                    <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
-                      <Icon name="ExclamationCircleIcon" size={12} />
-                      {signupForm.formState.errors.confirmPassword.message}
-                    </p>
-                  )}
-                </div>
-
+            <div>
+              <label htmlFor="password" className="block text-xs font-600 text-[#c4a46b] mb-1.5">
+                Password
+              </label>
+              <div className="relative">
+                <input
+                  id="password"
+                  type={showPassword ? 'text' : 'password'}
+                  placeholder="Your password"
+                  autoComplete="current-password"
+                  className={`w-full px-3.5 py-2.5 text-sm rounded-lg bg-[#1e1508] text-[#f0ddb0] placeholder-[#7a5e35] border transition-all focus:outline-none focus:ring-2 focus:ring-[#ecd862]/40 pr-10 ${
+                    errors.password ? 'border-[#c3802d]' : 'border-[#a3671d]/30 focus:border-[#ecd862]'
+                  }`}
+                  {...register('password', { required: 'Password is required' })}
+                />
                 <button
-                  type="submit"
-                  disabled={isLoading}
-                  className="w-full py-2.5 rounded-lg bg-brand-orange hover:bg-brand-orange-dark text-white text-sm font-600 transition-all duration-150 active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  type="button"
+                  onClick={() => setShowPassword((s) => !s)}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded text-[#7a5e35] hover:text-[#ecd862]"
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
                 >
-                  {isLoading ? (
-                    <><Icon name="ArrowPathIcon" size={16} className="animate-spin" />Creating account...</>
-                  ) : 'Create Account'}
+                  <Icon name={showPassword ? 'EyeSlashIcon' : 'EyeIcon'} size={16} />
                 </button>
-              </form>
+              </div>
+              {errors.password && (
+                <p className="text-[#f2cb50] text-xs mt-1.5">{errors.password.message}</p>
+              )}
+            </div>
 
-              <p className="text-[11px] text-slate-400 text-center mt-4">
-                By creating an account you agree to our{' '}
-                <span className="text-brand-orange hover:underline cursor-pointer">Terms of Service</span>
-                {' '}and{' '}
-                <span className="text-brand-orange hover:underline cursor-pointer">Privacy Policy</span>
-              </p>
-            </div>
-          )}
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="w-full py-2.5 rounded-lg font-700 text-[#0f0b05] bg-[#ecd862] hover:bg-[#f2cb50] disabled:opacity-60 transition-colors"
+            >
+              {isLoading ? 'Signing in...' : 'Sign in'}
+            </button>
+          </form>
 
-          {/* Demo Credentials */}
-          <div className="mt-4 bg-white rounded-xl border border-slate-200 shadow-card p-4">
-            <div className="flex items-center gap-2 mb-3">
-              <Icon name="KeyIcon" size={14} className="text-brand-orange" />
-              <span className="text-xs font-600 text-slate-700">Demo Credentials</span>
-              <span className="text-[10px] text-slate-400 ml-auto">Click to autofill</span>
-            </div>
-            <div className="space-y-1.5">
-              {DEMO_CREDENTIALS.map(cred => (
-                <div
-                  key={`cred-${cred.role}`}
-                  onClick={() => autofillCredentials(cred.email, cred.password)}
-                  className="flex items-center gap-3 px-3 py-2 rounded-lg bg-slate-50 hover:bg-orange-50 border border-transparent hover:border-brand-orange/30 cursor-pointer transition-all duration-150 group"
-                >
-                  <span className={`text-[10px] font-700 px-2 py-0.5 rounded-full ${
-                    cred.role === 'Admin' ? 'bg-red-100 text-red-600' :
-                    cred.role === 'Team Leader'? 'bg-brand-teal/10 text-brand-teal' : 'bg-slate-200 text-slate-600'
-                  }`}>{cred.role}</span>
-                  <span className="text-xs text-slate-600 flex-1 font-mono">{cred.email}</span>
-                  <Icon name="ArrowRightCircleIcon" size={14} className="text-slate-300 group-hover:text-brand-orange transition-colors" />
-                </div>
-              ))}
-            </div>
+          <div className="mt-8 p-4 rounded-lg border border-[#a3671d]/30 bg-[#1e1508]">
+            <p className="text-xs font-600 text-[#c4a46b] mb-1">Invited but no account yet?</p>
+            <p className="text-xs text-[#7a5e35]">
+              Open the invitation link your admin shared with you to finish creating your account. New sign-ups without an invitation are not allowed.
+            </p>
           </div>
         </div>
       </div>

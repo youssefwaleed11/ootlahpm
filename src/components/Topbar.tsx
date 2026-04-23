@@ -52,7 +52,7 @@ export default function Topbar({ onMobileMenuToggle, onChatToggle, chatOpen }: T
             className="w-full pl-9 pr-3 py-1.5 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-orange/30 focus:border-brand-orange placeholder-slate-400 transition-all duration-150"
           />
           <kbd className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200 hidden sm:block">
-            ⌘K
+            Ctrl K
           </kbd>
         </div>
       </div>
