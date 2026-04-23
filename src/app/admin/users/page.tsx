@@ -65,9 +65,7 @@ export default function UserManagementPage() {
     },
   ]);
 
-  const filteredUsers = filterRole === 'all'
-    ? users
-    : users.filter(u => u.role === filterRole);
+  const filteredUsers = filterRole === 'all' ? users : users.filter((u) => u.role === filterRole);
 
   const getRoleColor = (role: string) => {
     switch (role) {
@@ -85,9 +83,7 @@ export default function UserManagementPage() {
   };
 
   const getStatusColor = (status: string) => {
-    return status === 'active'
-      ? 'bg-green-100 text-green-700'
-      : 'bg-slate-100 text-slate-700';
+    return status === 'active' ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-700';
   };
 
   return (
@@ -116,15 +112,21 @@ export default function UserManagementPage() {
           </div>
           <div className="bg-white rounded-lg border border-slate-200 p-4">
             <p className="text-xs font-600 text-slate-600 uppercase mb-2">Active</p>
-            <p className="text-3xl font-800 text-green-600">{users.filter(u => u.status === 'active').length}</p>
+            <p className="text-3xl font-800 text-green-600">
+              {users.filter((u) => u.status === 'active').length}
+            </p>
           </div>
           <div className="bg-white rounded-lg border border-slate-200 p-4">
             <p className="text-xs font-600 text-slate-600 uppercase mb-2">Admins</p>
-            <p className="text-3xl font-800 text-red-600">{users.filter(u => u.role === 'admin').length}</p>
+            <p className="text-3xl font-800 text-red-600">
+              {users.filter((u) => u.role === 'admin').length}
+            </p>
           </div>
           <div className="bg-white rounded-lg border border-slate-200 p-4">
             <p className="text-xs font-600 text-slate-600 uppercase mb-2">Departments</p>
-            <p className="text-3xl font-800 text-blue-600">{new Set(users.map(u => u.department)).size}</p>
+            <p className="text-3xl font-800 text-blue-600">
+              {new Set(users.map((u) => u.department)).size}
+            </p>
           </div>
         </div>
 
@@ -152,7 +154,9 @@ export default function UserManagementPage() {
                 <tr className="border-b border-slate-200 bg-slate-50">
                   <th className="text-left py-4 px-6 font-700 text-slate-900 text-sm">Name</th>
                   <th className="text-left py-4 px-6 font-700 text-slate-900 text-sm">Email</th>
-                  <th className="text-left py-4 px-6 font-700 text-slate-900 text-sm">Department</th>
+                  <th className="text-left py-4 px-6 font-700 text-slate-900 text-sm">
+                    Department
+                  </th>
                   <th className="text-left py-4 px-6 font-700 text-slate-900 text-sm">Role</th>
                   <th className="text-left py-4 px-6 font-700 text-slate-900 text-sm">Status</th>
                   <th className="text-left py-4 px-6 font-700 text-slate-900 text-sm">Joined</th>
@@ -161,7 +165,10 @@ export default function UserManagementPage() {
               </thead>
               <tbody>
                 {filteredUsers.map((user) => (
-                  <tr key={user.id} className="border-b border-slate-100 hover:bg-slate-50 transition-colors">
+                  <tr
+                    key={user.id}
+                    className="border-b border-slate-100 hover:bg-slate-50 transition-colors"
+                  >
                     <td className="py-4 px-6">
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-full bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center text-white font-700 text-sm">
@@ -173,16 +180,22 @@ export default function UserManagementPage() {
                     <td className="py-4 px-6 text-slate-600">{user.email}</td>
                     <td className="py-4 px-6 text-slate-900 font-600">{user.department}</td>
                     <td className="py-4 px-6">
-                      <span className={`px-3 py-1 rounded-full text-xs font-600 ${getRoleColor(user.role)}`}>
+                      <span
+                        className={`px-3 py-1 rounded-full text-xs font-600 ${getRoleColor(user.role)}`}
+                      >
                         {user.role.replace('_', ' ')}
                       </span>
                     </td>
                     <td className="py-4 px-6">
-                      <span className={`px-3 py-1 rounded-full text-xs font-600 ${getStatusColor(user.status)}`}>
+                      <span
+                        className={`px-3 py-1 rounded-full text-xs font-600 ${getStatusColor(user.status)}`}
+                      >
                         {user.status}
                       </span>
                     </td>
-                    <td className="py-4 px-6 text-slate-600 text-sm">{new Date(user.joinDate).toLocaleDateString()}</td>
+                    <td className="py-4 px-6 text-slate-600 text-sm">
+                      {new Date(user.joinDate).toLocaleDateString()}
+                    </td>
                     <td className="py-4 px-6">
                       <div className="flex items-center gap-2">
                         <button className="p-1.5 hover:bg-slate-100 rounded transition-colors">
@@ -208,11 +221,17 @@ export default function UserManagementPage() {
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-600 text-slate-900 mb-2">Full Name</label>
-                  <input type="text" className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500" />
+                  <input
+                    type="text"
+                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+                  />
                 </div>
                 <div>
                   <label className="block text-sm font-600 text-slate-900 mb-2">Email</label>
-                  <input type="email" className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500" />
+                  <input
+                    type="email"
+                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+                  />
                 </div>
                 <div>
                   <label className="block text-sm font-600 text-slate-900 mb-2">Role</label>

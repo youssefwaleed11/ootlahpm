@@ -1,76 +1,66 @@
 import { NextRequest, NextResponse } from 'next/server';
-
-// Demo users - in production this would be from Supabase
-const DEMO_USERS: Record<string, { id: string; email: string; password: string; name: string; role: 'admin' | 'manager' | 'team_member'; department: string }> = {
-  'layla@ootlah.com': {
-    id: 'user-admin-001',
-    email: 'layla@ootlah.com',
-    password: 'Admin@2026',
-    name: 'Layla Admin',
-    role: 'admin',
-    department: 'management',
-  },
-  'omar@ootlah.com': {
-    id: 'user-manager-001',
-    email: 'omar@ootlah.com',
-    password: 'Leader@2026',
-    name: 'Omar Manager',
-    role: 'manager',
-    department: 'marketing',
-  },
-  'nour@ootlah.com': {
-    id: 'user-member-001',
-    email: 'nour@ootlah.com',
-    password: 'Agent@2026',
-    name: 'Nour Team Member',
-    role: 'team_member',
-    department: 'seo',
-  },
-};
+import { createClient as createServerSupabase } from '@/lib/supabase/server';
 
 export async function POST(request: NextRequest) {
   try {
-    const { email, password } = await request.json();
-
-    if (!email || !password) {
-      return NextResponse.json(
-        { error: 'Email and password required' },
-        { status: 400 }
-      );
-    }
-
-    const user = DEMO_USERS[email];
-
-    if (!user || user.password !== password) {
-      return NextResponse.json(
-        { error: 'Invalid email or password' },
-        { status: 401 }
-      );
-    }
-
-    // Create mock session
-    const mockSession = {
-      access_token: `token-${user.id}-${Date.now()}`,
-      refresh_token: `refresh-${user.id}-${Date.now()}`,
-      expires_in: 3600,
-      token_type: 'Bearer',
+    const { email, password } = (await request.json()) as {
+      email?: string;
+      password?: string;
     };
 
-    return NextResponse.json({
-      user: {
-        id: user.id,
-        email: user.email,
-        name: user.name,
-        role: user.role,
-        department: user.department,
-      },
-      session: mockSession,
+    if (!email || !password) {
+      return NextResponse.json({ error: 'Email and password are required.' }, { status: 400 });
+    }
+
+    const supabase = await createServerSupabase();
+
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: email.trim().toLowerCase(),
+      password,
     });
-  } catch (error) {
-    console.error('[v0] Login error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+
+    if (error || !data.session || !data.user) {
+      return NextResponse.json({ error: 'Invalid email or password.' }, { status: 401 });
+    }
+
+    const { data: profile, error: profileErr } = await supabase
+      .from('users')
+      .select(
+        'id, organization_id, email, full_name, avatar_url, role, is_active, position, theme_preference'
+      )
+      .eq('id', data.user.id)
+      .single();
+
+    if (profileErr || !profile) {
+      await supabase.auth.signOut();
+      return NextResponse.json(
+        {
+          error: 'Your account is not fully provisioned. Contact your administrator.',
+        },
+        { status: 403 }
+      );
+    }
+
+    if (!profile.is_active) {
+      await supabase.auth.signOut();
+      return NextResponse.json({ error: 'This account has been deactivated.' }, { status: 403 });
+    }
+
+    await supabase
+      .from('users')
+      .update({ last_login: new Date().toISOString() })
+      .eq('id', profile.id);
+
+    return NextResponse.json({
+      user: profile,
+      session: {
+        access_token: data.session.access_token,
+        refresh_token: data.session.refresh_token,
+        expires_at: data.session.expires_at,
+      },
+    });
+  } catch (err) {
+    console.error('[auth/login] error:', err);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

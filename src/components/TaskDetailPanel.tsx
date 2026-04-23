@@ -38,7 +38,8 @@ export default function TaskDetailPanel({
       id: '1',
       author: 'Omar Hassan',
       avatar: 'O',
-      content: 'I have reviewed the first draft. Please update the budget section with the latest figures.',
+      content:
+        'I have reviewed the first draft. Please update the budget section with the latest figures.',
       mentions: ['@Layla'],
       attachments: [],
       timestamp: '2 hours ago',
@@ -67,7 +68,7 @@ export default function TaskDetailPanel({
       avatar: 'L',
       content: newComment,
       mentions: newComment.match(/@\w+/g) || [],
-      attachments: attachedFiles.map(f => ({ name: f.name, url: '#' })),
+      attachments: attachedFiles.map((f) => ({ name: f.name, url: '#' })),
       timestamp: 'just now',
     };
 
@@ -112,10 +113,14 @@ export default function TaskDetailPanel({
           <h1 className="text-2xl font-800 text-slate-900 mb-2">{taskTitle}</h1>
           <p className="text-sm text-slate-600 mb-3">Task #{taskId}</p>
           <div className="flex items-center gap-2">
-            <span className={`px-2 py-1 rounded-full text-xs font-600 ${getPriorityColor(taskPriority)}`}>
+            <span
+              className={`px-2 py-1 rounded-full text-xs font-600 ${getPriorityColor(taskPriority)}`}
+            >
               {taskPriority}
             </span>
-            <span className={`px-2 py-1 rounded-full text-xs font-600 ${getStatusColor(taskStatus)}`}>
+            <span
+              className={`px-2 py-1 rounded-full text-xs font-600 ${getStatusColor(taskStatus)}`}
+            >
               {taskStatus.replace('_', ' ')}
             </span>
           </div>
@@ -145,7 +150,9 @@ export default function TaskDetailPanel({
             </div>
             <div>
               <p className="text-xs font-600 text-slate-600 uppercase mb-1">Due Date</p>
-              <p className="text-sm font-600 text-slate-900">{new Date(dueDate).toLocaleDateString()}</p>
+              <p className="text-sm font-600 text-slate-900">
+                {new Date(dueDate).toLocaleDateString()}
+              </p>
             </div>
           </div>
         </div>
@@ -158,7 +165,7 @@ export default function TaskDetailPanel({
 
           {/* Comments List */}
           <div className="flex-1 overflow-y-auto px-6 space-y-4">
-            {comments.map(comment => (
+            {comments.map((comment) => (
               <div key={comment.id} className="flex gap-3">
                 <div className="w-8 h-8 rounded-full bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center text-white text-xs font-700 flex-shrink-0">
                   {comment.avatar}
@@ -200,15 +207,15 @@ export default function TaskDetailPanel({
                 className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 resize-none text-sm"
                 rows={3}
               />
-              
+
               {/* Mentions Dropdown */}
               {showMentions && (
                 <div className="absolute bottom-full left-0 right-0 mb-2 bg-white border border-slate-200 rounded-lg shadow-lg max-h-40 overflow-y-auto">
-                  {['Layla Ahmed', 'Omar Hassan', 'Nour Ibrahim', 'Sara Mohamed'].map(name => (
+                  {['Layla Ahmed', 'Omar Hassan', 'Nour Ibrahim', 'Sara Mohamed'].map((name) => (
                     <button
                       key={name}
                       onClick={() => {
-                        setNewComment(prev => prev + name.split(' ')[0]);
+                        setNewComment((prev) => prev + name.split(' ')[0]);
                         setShowMentions(false);
                       }}
                       className="w-full text-left px-4 py-2 hover:bg-slate-100 text-sm text-slate-700 border-b border-slate-100 last:border-b-0"

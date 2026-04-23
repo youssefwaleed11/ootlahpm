@@ -19,27 +19,30 @@ export default function ProjectManagementPage() {
   const [inviteModalOpen, setInviteModalOpen] = useState(false);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
 
-  const filtered = projects.filter(p => {
+  const filtered = projects.filter((p) => {
     const matchStatus = statusFilter === 'all' || p.status === statusFilter;
     const matchTeam = teamFilter === 'all' || p.teamId === teamFilter;
-    const matchSearch = !searchQuery || p.name.toLowerCase().includes(searchQuery.toLowerCase()) || p.description.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchSearch =
+      !searchQuery ||
+      p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      p.description.toLowerCase().includes(searchQuery.toLowerCase());
     return matchStatus && matchTeam && matchSearch;
   });
 
   const handleCreateProject = (project: Project) => {
     // BACKEND INTEGRATION: Supabase insert project + Resend email to team members
-    setProjects(prev => [project, ...prev]);
+    setProjects((prev) => [project, ...prev]);
     setCreateModalOpen(false);
   };
 
   const handleArchiveProject = (projectId: string) => {
     // BACKEND INTEGRATION: Supabase update project status to archived
-    setProjects(prev => prev.map(p => p.id === projectId ? { ...p, status: 'archived' } : p));
+    setProjects((prev) => prev.map((p) => (p.id === projectId ? { ...p, status: 'archived' } : p)));
   };
 
   const handleDeleteProject = (projectId: string) => {
     // BACKEND INTEGRATION: Supabase delete project + cascade tasks
-    setProjects(prev => prev.filter(p => p.id !== projectId));
+    setProjects((prev) => prev.filter((p) => p.id !== projectId));
   };
 
   return (
@@ -49,7 +52,9 @@ export default function ProjectManagementPage() {
         <div className="flex items-start justify-between gap-4 flex-wrap">
           <div>
             <h1 className="text-2xl font-700 text-slate-800 tracking-tight">Projects</h1>
-            <p className="text-sm text-slate-500 mt-0.5">Manage your workspace projects, teams, and progress</p>
+            <p className="text-sm text-slate-500 mt-0.5">
+              Manage your workspace projects, teams, and progress
+            </p>
           </div>
           <div className="flex items-center gap-2 flex-wrap">
             <button
@@ -67,7 +72,10 @@ export default function ProjectManagementPage() {
               Manage Teams
             </button>
             <button
-              onClick={() => { setEditingProject(null); setCreateModalOpen(true); }}
+              onClick={() => {
+                setEditingProject(null);
+                setCreateModalOpen(true);
+              }}
               className="flex items-center gap-1.5 px-3 py-2 bg-brand-orange hover:bg-brand-orange-dark text-white text-sm font-600 rounded-lg transition-all duration-150 active:scale-95 shadow-sm"
             >
               <Icon name="PlusIcon" size={16} />
@@ -93,7 +101,10 @@ export default function ProjectManagementPage() {
         {/* Project grid */}
         <ProjectGrid
           projects={filtered}
-          onEdit={p => { setEditingProject(p); setCreateModalOpen(true); }}
+          onEdit={(p) => {
+            setEditingProject(p);
+            setCreateModalOpen(true);
+          }}
           onArchive={handleArchiveProject}
           onDelete={handleDeleteProject}
         />
@@ -103,26 +114,46 @@ export default function ProjectManagementPage() {
       {createModalOpen && (
         <CreateProjectModal
           editingProject={editingProject}
-          onClose={() => { setCreateModalOpen(false); setEditingProject(null); }}
+          onClose={() => {
+            setCreateModalOpen(false);
+            setEditingProject(null);
+          }}
           onCreate={handleCreateProject}
         />
       )}
-      {teamPanelOpen && (
-        <TeamManagementPanel onClose={() => setTeamPanelOpen(false)} />
-      )}
-      {inviteModalOpen && (
-        <InviteUserModal onClose={() => setInviteModalOpen(false)} />
-      )}
+      {teamPanelOpen && <TeamManagementPanel onClose={() => setTeamPanelOpen(false)} />}
+      {inviteModalOpen && <InviteUserModal onClose={() => setInviteModalOpen(false)} />}
     </AppLayout>
   );
 }
 
 // Local Icon import for this file
-function Icon({ name, size = 16, className = '' }: { name: string; size?: number; className?: string }) {
+function Icon({
+  name,
+  size = 16,
+  className = '',
+}: {
+  name: string;
+  size?: number;
+  className?: string;
+}) {
   const icons: Record<string, React.ReactNode> = {
     UserPlusIcon: (
-      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" width={size} height={size} className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M19 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zM4 19.235v-.11a6.375 6.375 0 0112.75 0v.109A12.318 12.318 0 0110.374 21c-2.331 0-4.512-.645-6.374-1.766z" />
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+        strokeWidth={1.5}
+        stroke="currentColor"
+        width={size}
+        height={size}
+        className={className}
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          d="M19 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zM4 19.235v-.11a6.375 6.375 0 0112.75 0v.109A12.318 12.318 0 0110.374 21c-2.331 0-4.512-.645-6.374-1.766z"
+        />
       </svg>
     ),
   };

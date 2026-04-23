@@ -21,11 +21,19 @@ type ProjectForm = {
   tags: string;
 };
 
-export default function CreateProjectModal({ editingProject, onClose, onCreate }: CreateProjectModalProps) {
+export default function CreateProjectModal({
+  editingProject,
+  onClose,
+  onCreate,
+}: CreateProjectModalProps) {
   const [isLoading, setIsLoading] = useState(false);
   const isEditing = !!editingProject;
 
-  const { register, handleSubmit, formState: { errors } } = useForm<ProjectForm>({
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<ProjectForm>({
     defaultValues: {
       name: editingProject?.name || '',
       description: editingProject?.description || '',
@@ -40,7 +48,7 @@ export default function CreateProjectModal({ editingProject, onClose, onCreate }
   const onSubmit = async (data: ProjectForm) => {
     setIsLoading(true);
     // BACKEND INTEGRATION: Supabase insert/update project + Resend email to team
-    await new Promise(r => setTimeout(r, 900));
+    await new Promise((r) => setTimeout(r, 900));
 
     const newProject: Project = {
       id: editingProject?.id || `proj-${Date.now()}`,
@@ -53,7 +61,10 @@ export default function CreateProjectModal({ editingProject, onClose, onCreate }
       dueDate: data.dueDate,
       progress: editingProject?.progress || 0,
       priority: data.priority,
-      tags: data.tags.split(',').map(t => t.trim()).filter(Boolean),
+      tags: data.tags
+        .split(',')
+        .map((t) => t.trim())
+        .filter(Boolean),
       taskCount: editingProject?.taskCount || 0,
       completedTaskCount: editingProject?.completedTaskCount || 0,
       createdAt: editingProject?.createdAt || new Date().toISOString(),
@@ -73,9 +84,14 @@ export default function CreateProjectModal({ editingProject, onClose, onCreate }
             <div className="w-8 h-8 rounded-lg bg-brand-orange/10 flex items-center justify-center">
               <Icon name="FolderPlusIcon" size={16} className="text-brand-orange" />
             </div>
-            <h2 className="text-base font-700 text-slate-800">{isEditing ? 'Edit Project' : 'Create New Project'}</h2>
+            <h2 className="text-base font-700 text-slate-800">
+              {isEditing ? 'Edit Project' : 'Create New Project'}
+            </h2>
           </div>
-          <button onClick={onClose} className="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors">
+          <button
+            onClick={onClose}
+            className="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors"
+          >
             <Icon name="XMarkIcon" size={18} />
           </button>
         </div>
@@ -91,7 +107,10 @@ export default function CreateProjectModal({ editingProject, onClose, onCreate }
               type="text"
               placeholder="e.g. Mobile App Redesign"
               className={`w-full px-3.5 py-2.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-orange/30 focus:border-brand-orange transition-all duration-150 ${errors.name ? 'border-red-400 bg-red-50' : 'border-slate-200 bg-slate-50'}`}
-              {...register('name', { required: 'Project name is required', minLength: { value: 3, message: 'Name must be at least 3 characters' } })}
+              {...register('name', {
+                required: 'Project name is required',
+                minLength: { value: 3, message: 'Name must be at least 3 characters' },
+              })}
             />
             {errors.name && (
               <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
@@ -106,7 +125,9 @@ export default function CreateProjectModal({ editingProject, onClose, onCreate }
             <label className="block text-xs font-600 text-slate-700 mb-1.5" htmlFor="proj-desc">
               Description
             </label>
-            <p className="text-[11px] text-slate-400 mb-1.5">Provide context for the team about the project scope and goals</p>
+            <p className="text-[11px] text-slate-400 mb-1.5">
+              Provide context for the team about the project scope and goals
+            </p>
             <textarea
               id="proj-desc"
               rows={3}
@@ -127,8 +148,10 @@ export default function CreateProjectModal({ editingProject, onClose, onCreate }
                 className={`w-full px-3.5 py-2.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-orange/30 focus:border-brand-orange transition-all duration-150 bg-slate-50 cursor-pointer ${errors.teamId ? 'border-red-400' : 'border-slate-200'}`}
                 {...register('teamId', { required: 'Please assign a team' })}
               >
-                {MOCK_TEAMS.map(team => (
-                  <option key={team.id} value={team.id}>{team.name}</option>
+                {MOCK_TEAMS.map((team) => (
+                  <option key={team.id} value={team.id}>
+                    {team.name}
+                  </option>
                 ))}
               </select>
               {errors.teamId && (
@@ -137,7 +160,10 @@ export default function CreateProjectModal({ editingProject, onClose, onCreate }
             </div>
 
             <div>
-              <label className="block text-xs font-600 text-slate-700 mb-1.5" htmlFor="proj-priority">
+              <label
+                className="block text-xs font-600 text-slate-700 mb-1.5"
+                htmlFor="proj-priority"
+              >
                 Priority <span className="text-red-400">*</span>
               </label>
               <select
@@ -184,7 +210,9 @@ export default function CreateProjectModal({ editingProject, onClose, onCreate }
             <label className="block text-xs font-600 text-slate-700 mb-1.5" htmlFor="proj-tags">
               Tags
             </label>
-            <p className="text-[11px] text-slate-400 mb-1.5">Separate tags with commas — e.g. mobile, design, Q2</p>
+            <p className="text-[11px] text-slate-400 mb-1.5">
+              Separate tags with commas — e.g. mobile, design, Q2
+            </p>
             <input
               id="proj-tags"
               type="text"
@@ -209,9 +237,14 @@ export default function CreateProjectModal({ editingProject, onClose, onCreate }
               className="flex-1 py-2.5 bg-brand-orange hover:bg-brand-orange-dark text-white rounded-lg text-sm font-600 transition-all duration-150 active:scale-[0.98] disabled:opacity-70 flex items-center justify-center gap-2"
             >
               {isLoading ? (
-                <><Icon name="ArrowPathIcon" size={16} className="animate-spin" />{isEditing ? 'Saving...' : 'Creating...'}</>
+                <>
+                  <Icon name="ArrowPathIcon" size={16} className="animate-spin" />
+                  {isEditing ? 'Saving...' : 'Creating...'}
+                </>
+              ) : isEditing ? (
+                'Save Changes'
               ) : (
-                isEditing ? 'Save Changes' : 'Create Project'
+                'Create Project'
               )}
             </button>
           </div>

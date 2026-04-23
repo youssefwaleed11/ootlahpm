@@ -69,7 +69,7 @@ export default function AdvancedFilters({ onFilterChange, onSaveFilter }: Advanc
   const toggleMultiSelect = (key: keyof FilterConfig, value: string) => {
     const current = (filters[key] as string[]) || [];
     const newValue = current.includes(value)
-      ? current.filter(v => v !== value)
+      ? current.filter((v) => v !== value)
       : [...current, value];
     handleFilterChange(key, newValue);
   };
@@ -110,8 +110,8 @@ export default function AdvancedFilters({ onFilterChange, onSaveFilter }: Advanc
             isOpen
               ? 'bg-red-600 text-white'
               : activeFilterCount > 0
-              ? 'bg-red-100 text-red-700 border border-red-300'
-              : 'border border-slate-300 text-slate-700 hover:bg-slate-50'
+                ? 'bg-red-100 text-red-700 border border-red-300'
+                : 'border border-slate-300 text-slate-700 hover:bg-slate-50'
           }`}
         >
           <Icon name="FunnelIcon" size={16} />
@@ -127,10 +127,7 @@ export default function AdvancedFilters({ onFilterChange, onSaveFilter }: Advanc
         {isOpen && (
           <>
             {/* Backdrop */}
-            <div
-              className="fixed inset-0 z-30"
-              onClick={() => setIsOpen(false)}
-            />
+            <div className="fixed inset-0 z-30" onClick={() => setIsOpen(false)} />
 
             {/* Panel */}
             <div className="absolute top-full left-0 mt-2 w-96 bg-white border border-slate-200 rounded-lg shadow-xl z-40 max-h-96 overflow-y-auto">
@@ -151,7 +148,7 @@ export default function AdvancedFilters({ onFilterChange, onSaveFilter }: Advanc
                 <div>
                   <h3 className="text-xs font-700 text-slate-900 uppercase mb-3">Departments</h3>
                   <div className="space-y-2">
-                    {DEPARTMENTS.map(dept => (
+                    {DEPARTMENTS.map((dept) => (
                       <label key={dept.id} className="flex items-center gap-2 cursor-pointer">
                         <input
                           type="checkbox"
@@ -169,7 +166,7 @@ export default function AdvancedFilters({ onFilterChange, onSaveFilter }: Advanc
                 <div>
                   <h3 className="text-xs font-700 text-slate-900 uppercase mb-3">Status</h3>
                   <div className="space-y-2">
-                    {STATUSES.map(status => (
+                    {STATUSES.map((status) => (
                       <label key={status.id} className="flex items-center gap-2 cursor-pointer">
                         <input
                           type="checkbox"
@@ -187,7 +184,7 @@ export default function AdvancedFilters({ onFilterChange, onSaveFilter }: Advanc
                 <div>
                   <h3 className="text-xs font-700 text-slate-900 uppercase mb-3">Priority</h3>
                   <div className="space-y-2">
-                    {PRIORITIES.map(priority => (
+                    {PRIORITIES.map((priority) => (
                       <label key={priority.id} className="flex items-center gap-2 cursor-pointer">
                         <input
                           type="checkbox"
@@ -205,7 +202,7 @@ export default function AdvancedFilters({ onFilterChange, onSaveFilter }: Advanc
                 <div>
                   <h3 className="text-xs font-700 text-slate-900 uppercase mb-3">Assigned To</h3>
                   <div className="space-y-2">
-                    {ASSIGNEES.map(assignee => (
+                    {ASSIGNEES.map((assignee) => (
                       <label key={assignee.id} className="flex items-center gap-2 cursor-pointer">
                         <input
                           type="checkbox"

@@ -95,9 +95,7 @@ export default function AdminDashboard() {
     return (
       <div className="min-h-screen bg-slate-50 p-8">
         <div className="max-w-6xl mx-auto">
-          <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
-            {error}
-          </div>
+          <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">{error}</div>
         </div>
       </div>
     );
@@ -108,9 +106,7 @@ export default function AdminDashboard() {
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-slate-900 mb-2">
-            Performance Dashboard
-          </h1>
+          <h1 className="text-4xl font-bold text-slate-900 mb-2">Performance Dashboard</h1>
           <p className="text-slate-600">
             {selectedDept ? 'Employee Performance' : 'Department Performance Overview'}
           </p>
@@ -145,9 +141,7 @@ export default function AdminDashboard() {
                       <h3 className="font-semibold text-slate-900">{dept.name}</h3>
                     </div>
                   </div>
-                  <span className="text-2xl font-bold text-slate-900">
-                    {dept.completionRate}%
-                  </span>
+                  <span className="text-2xl font-bold text-slate-900">{dept.completionRate}%</span>
                 </div>
 
                 {/* Progress Bar */}
@@ -168,9 +162,7 @@ export default function AdminDashboard() {
                   </div>
                   <div>
                     <p className="text-slate-600 mb-1">Completion Rate</p>
-                    <p className="text-xl font-bold text-slate-900">
-                      {dept.completionRate}%
-                    </p>
+                    <p className="text-xl font-bold text-slate-900">{dept.completionRate}%</p>
                   </div>
                 </div>
 
@@ -189,10 +181,7 @@ export default function AdminDashboard() {
               </div>
             ) : (
               employees.map((emp) => (
-                <div
-                  key={emp.userId}
-                  className="bg-white rounded-lg shadow p-6"
-                >
+                <div key={emp.userId} className="bg-white rounded-lg shadow p-6">
                   <div className="flex items-center gap-4 mb-4">
                     {emp.avatar ? (
                       <img
@@ -207,9 +196,7 @@ export default function AdminDashboard() {
                     )}
                     <div className="flex-1">
                       <h3 className="font-semibold text-slate-900">{emp.name}</h3>
-                      <p className="text-sm text-slate-600">
-                        {emp.completionRate}% Complete
-                      </p>
+                      <p className="text-sm text-slate-600">{emp.completionRate}% Complete</p>
                     </div>
                   </div>
 
@@ -225,15 +212,11 @@ export default function AdminDashboard() {
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
                       <p className="text-slate-600 mb-1">Assigned Tasks</p>
-                      <p className="text-lg font-bold text-slate-900">
-                        {emp.totalTasks}
-                      </p>
+                      <p className="text-lg font-bold text-slate-900">{emp.totalTasks}</p>
                     </div>
                     <div>
                       <p className="text-slate-600 mb-1">Completed</p>
-                      <p className="text-lg font-bold text-green-600">
-                        {emp.completedTasks}
-                      </p>
+                      <p className="text-lg font-bold text-green-600">{emp.completedTasks}</p>
                     </div>
                   </div>
 

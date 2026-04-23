@@ -75,9 +75,10 @@ export default function PortfoliosPage() {
     },
   ];
 
-  const filteredPortfolios = selectedDepartment === 'all'
-    ? portfolios
-    : portfolios.filter(p => p.department === selectedDepartment);
+  const filteredPortfolios =
+    selectedDepartment === 'all'
+      ? portfolios
+      : portfolios.filter((p) => p.department === selectedDepartment);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -112,7 +113,9 @@ export default function PortfoliosPage() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-800 text-slate-900 mb-2">Portfolios</h1>
-            <p className="text-slate-600">Showcase of completed and ongoing projects by department</p>
+            <p className="text-slate-600">
+              Showcase of completed and ongoing projects by department
+            </p>
           </div>
           <button className="flex items-center gap-2 px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-lg font-600 transition-colors">
             <Icon name="PlusIcon" size={18} />
@@ -122,7 +125,7 @@ export default function PortfoliosPage() {
 
         {/* Department Filter */}
         <div className="flex flex-wrap gap-2">
-          {departments.map(dept => (
+          {departments.map((dept) => (
             <button
               key={dept.id}
               onClick={() => setSelectedDepartment(dept.id)}
@@ -139,7 +142,7 @@ export default function PortfoliosPage() {
 
         {/* Projects Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredPortfolios.map(project => (
+          {filteredPortfolios.map((project) => (
             <div
               key={project.id}
               className={`rounded-xl border p-6 transition-all hover:shadow-lg cursor-pointer ${getStatusColor(project.status)}`}
@@ -150,7 +153,9 @@ export default function PortfoliosPage() {
                   <h3 className="text-lg font-700 text-slate-900 mb-1">{project.title}</h3>
                   <p className="text-sm text-slate-600">{project.client}</p>
                 </div>
-                <span className={`px-3 py-1 rounded-full text-xs font-600 whitespace-nowrap ${getStatusBadgeColor(project.status)}`}>
+                <span
+                  className={`px-3 py-1 rounded-full text-xs font-600 whitespace-nowrap ${getStatusBadgeColor(project.status)}`}
+                >
                   {project.status.replace('_', ' ')}
                 </span>
               </div>
@@ -171,8 +176,11 @@ export default function PortfoliosPage() {
 
               {/* Tags */}
               <div className="flex flex-wrap gap-2">
-                {project.tags.map(tag => (
-                  <span key={tag} className="px-2 py-1 bg-white bg-opacity-50 rounded text-xs font-500 text-slate-700">
+                {project.tags.map((tag) => (
+                  <span
+                    key={tag}
+                    className="px-2 py-1 bg-white bg-opacity-50 rounded text-xs font-500 text-slate-700"
+                  >
                     {tag}
                   </span>
                 ))}

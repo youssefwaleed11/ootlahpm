@@ -13,20 +13,20 @@ import {
 
 // ============ TASKS ============
 
-export async function getTasks(organizationId: string, filters?: {
-  departmentId?: string;
-  projectId?: string;
-  status?: TaskStatus;
-  priority?: PriorityLevel;
-  assignedTo?: string;
-  search?: string;
-}) {
+export async function getTasks(
+  organizationId: string,
+  filters?: {
+    departmentId?: string;
+    projectId?: string;
+    status?: TaskStatus;
+    priority?: PriorityLevel;
+    assignedTo?: string;
+    search?: string;
+  }
+) {
   const supabase = await createClient();
-  
-  let query = supabase
-    .from('tasks')
-    .select('*')
-    .eq('organization_id', organizationId);
+
+  let query = supabase.from('tasks').select('*').eq('organization_id', organizationId);
 
   if (filters?.departmentId) {
     query = query.eq('department_id', filters.departmentId);
@@ -54,12 +54,8 @@ export async function getTasks(organizationId: string, filters?: {
 
 export async function getTaskById(taskId: string) {
   const supabase = await createClient();
-  
-  const { data, error } = await supabase
-    .from('tasks')
-    .select('*')
-    .eq('id', taskId)
-    .single();
+
+  const { data, error } = await supabase.from('tasks').select('*').eq('id', taskId).single();
 
   if (error) throw error;
   return data as Task;
@@ -67,12 +63,8 @@ export async function getTaskById(taskId: string) {
 
 export async function createTask(task: Omit<Task, 'id' | 'created_at' | 'updated_at'>) {
   const supabase = await createClient();
-  
-  const { data, error } = await supabase
-    .from('tasks')
-    .insert([task])
-    .select()
-    .single();
+
+  const { data, error } = await supabase.from('tasks').insert([task]).select().single();
 
   if (error) throw error;
   return data as Task;
@@ -80,7 +72,7 @@ export async function createTask(task: Omit<Task, 'id' | 'created_at' | 'updated
 
 export async function updateTask(taskId: string, updates: Partial<Task>) {
   const supabase = await createClient();
-  
+
   const { data, error } = await supabase
     .from('tasks')
     .update({
@@ -99,11 +91,8 @@ export async function updateTask(taskId: string, updates: Partial<Task>) {
 
 export async function getProjects(organizationId: string, departmentId?: string) {
   const supabase = await createClient();
-  
-  let query = supabase
-    .from('projects')
-    .select('*')
-    .eq('organization_id', organizationId);
+
+  let query = supabase.from('projects').select('*').eq('organization_id', organizationId);
 
   if (departmentId) {
     query = query.eq('department_id', departmentId);
@@ -116,12 +105,8 @@ export async function getProjects(organizationId: string, departmentId?: string)
 
 export async function getProjectById(projectId: string) {
   const supabase = await createClient();
-  
-  const { data, error } = await supabase
-    .from('projects')
-    .select('*')
-    .eq('id', projectId)
-    .single();
+
+  const { data, error } = await supabase.from('projects').select('*').eq('id', projectId).single();
 
   if (error) throw error;
   return data as Project;
@@ -129,12 +114,8 @@ export async function getProjectById(projectId: string) {
 
 export async function createProject(project: Omit<Project, 'id' | 'created_at' | 'updated_at'>) {
   const supabase = await createClient();
-  
-  const { data, error } = await supabase
-    .from('projects')
-    .insert([project])
-    .select()
-    .single();
+
+  const { data, error } = await supabase.from('projects').insert([project]).select().single();
 
   if (error) throw error;
   return data as Project;
@@ -144,7 +125,7 @@ export async function createProject(project: Omit<Project, 'id' | 'created_at' |
 
 export async function getDepartments(organizationId: string) {
   const supabase = await createClient();
-  
+
   const { data, error } = await supabase
     .from('departments')
     .select('*')
@@ -157,16 +138,18 @@ export async function getDepartments(organizationId: string) {
 
 export async function getDepartmentWithMembers(departmentId: string) {
   const supabase = await createClient();
-  
+
   const { data, error } = await supabase
     .from('departments')
-    .select(`
+    .select(
+      `
       *,
       department_members!inner(
         user_id,
         role
       )
-    `)
+    `
+    )
     .eq('id', departmentId)
     .single();
 
@@ -178,7 +161,7 @@ export async function getDepartmentWithMembers(departmentId: string) {
 
 export async function getUsers(organizationId: string) {
   const supabase = await createClient();
-  
+
   const { data, error } = await supabase
     .from('users')
     .select('*')
@@ -192,12 +175,8 @@ export async function getUsers(organizationId: string) {
 
 export async function getUserById(userId: string) {
   const supabase = await createClient();
-  
-  const { data, error } = await supabase
-    .from('users')
-    .select('*')
-    .eq('id', userId)
-    .single();
+
+  const { data, error } = await supabase.from('users').select('*').eq('id', userId).single();
 
   if (error) throw error;
   return data as User;
@@ -205,10 +184,13 @@ export async function getUserById(userId: string) {
 
 export async function getCurrentUser() {
   const supabase = await createClient();
-  const { data: { user }, error } = await supabase.auth.getUser();
-  
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser();
+
   if (error || !user) throw error || new Error('No user found');
-  
+
   const { data: userData, error: userError } = await supabase
     .from('users')
     .select('*')
@@ -223,7 +205,7 @@ export async function getCurrentUser() {
 
 export async function getTaskComments(taskId: string) {
   const supabase = await createClient();
-  
+
   const { data, error } = await supabase
     .from('task_comments')
     .select('*')
@@ -234,14 +216,12 @@ export async function getTaskComments(taskId: string) {
   return data as TaskComment[];
 }
 
-export async function createTaskComment(comment: Omit<TaskComment, 'id' | 'created_at' | 'updated_at'>) {
+export async function createTaskComment(
+  comment: Omit<TaskComment, 'id' | 'created_at' | 'updated_at'>
+) {
   const supabase = await createClient();
-  
-  const { data, error } = await supabase
-    .from('task_comments')
-    .insert([comment])
-    .select()
-    .single();
+
+  const { data, error } = await supabase.from('task_comments').insert([comment]).select().single();
 
   if (error) throw error;
   return data as TaskComment;
@@ -251,7 +231,7 @@ export async function createTaskComment(comment: Omit<TaskComment, 'id' | 'creat
 
 export async function getSavedFilters(userId: string) {
   const supabase = await createClient();
-  
+
   const { data, error } = await supabase
     .from('saved_filters')
     .select('*')
@@ -262,14 +242,12 @@ export async function getSavedFilters(userId: string) {
   return data as SavedFilter[];
 }
 
-export async function createSavedFilter(filter: Omit<SavedFilter, 'id' | 'created_at' | 'updated_at'>) {
+export async function createSavedFilter(
+  filter: Omit<SavedFilter, 'id' | 'created_at' | 'updated_at'>
+) {
   const supabase = await createClient();
-  
-  const { data, error } = await supabase
-    .from('saved_filters')
-    .insert([filter])
-    .select()
-    .single();
+
+  const { data, error } = await supabase.from('saved_filters').insert([filter]).select().single();
 
   if (error) throw error;
   return data as SavedFilter;
@@ -279,7 +257,7 @@ export async function createSavedFilter(filter: Omit<SavedFilter, 'id' | 'create
 
 export async function getDashboardStats(organizationId: string) {
   const supabase = await createClient();
-  
+
   // Total tasks
   const { data: totalTasks, error: tasksError } = await supabase
     .from('tasks')
@@ -310,15 +288,21 @@ export async function getDashboardStats(organizationId: string) {
     throw tasksError || statusError || overdueError || deptError;
   }
 
-  const statsByStatus = (tasksByStatus || []).reduce((acc, task) => {
-    acc[task.status] = (acc[task.status] || 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
+  const statsByStatus = (tasksByStatus || []).reduce(
+    (acc, task) => {
+      acc[task.status] = (acc[task.status] || 0) + 1;
+      return acc;
+    },
+    {} as Record<string, number>
+  );
 
-  const statsByDept = (tasksByDept || []).reduce((acc, task) => {
-    acc[task.department_id] = (acc[task.department_id] || 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
+  const statsByDept = (tasksByDept || []).reduce(
+    (acc, task) => {
+      acc[task.department_id] = (acc[task.department_id] || 0) + 1;
+      return acc;
+    },
+    {} as Record<string, number>
+  );
 
   return {
     total_tasks: totalTasks?.length || 0,
