@@ -166,14 +166,14 @@ pnpm install
 
 ## Key Features to Try
 
-✅ Login with different roles  
-✅ Create a new project  
-✅ Add a task to the project  
-✅ Assign task to user  
-✅ Add comment with mention (@username)  
-✅ Mark task as complete  
-✅ View admin dashboard  
-✅ Drill-down to see employee metrics  
+ Login with different roles  
+ Create a new project  
+ Add a task to the project  
+ Assign task to user  
+ Add comment with mention (@username)  
+ Mark task as complete  
+ View admin dashboard  
+ Drill-down to see employee metrics  
 
 ---
 
@@ -181,23 +181,23 @@ pnpm install
 
 ```
 ootlahpm/
-├── src/
-│   ├── app/
-│   │   ├── api/              ← API Routes
-│   │   ├── login/            ← Login page
-│   │   ├── dashboard/        ← Main dashboard
-│   │   ├── admin/            ← Admin pages
-│   │   ├── my-tasks/         ← Personal tasks
-│   │   └── ...
-│   ├── components/           ← React components
-│   ├── hooks/                ← Custom hooks
-│   └── lib/
-├── scripts/
-│   ├── 01_create_schema.sql  ← Database setup
-│   └── 02_seed_data.sql      ← Demo data
-├── BACKEND_GUIDE.md          ← API docs
-├── FOCUS_BUILD_COMPLETE.md   ← Architecture
-└── README.md                 ← Project info
+ src/
+    app/
+       api/              ← API Routes
+       login/            ← Login page
+       dashboard/        ← Main dashboard
+       admin/            ← Admin pages
+       my-tasks/         ← Personal tasks
+       ...
+    components/           ← React components
+    hooks/                ← Custom hooks
+    lib/
+ scripts/
+    01_create_schema.sql  ← Database setup
+    02_seed_data.sql      ← Demo data
+ BACKEND_GUIDE.md          ← API docs
+ FOCUS_BUILD_COMPLETE.md   ← Architecture
+ README.md                 ← Project info
 ```
 
 ---
@@ -268,7 +268,7 @@ Ready to deploy? Push to GitHub and connect to Vercel.
 
 ---
 
-## You're Ready! 🚀
+## You're Ready! 
 
 Start by:
 1. Creating a new project

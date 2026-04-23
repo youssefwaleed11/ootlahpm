@@ -1,195 +1,303 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
+import { toast } from 'sonner';
 import AppLayout from '@/components/AppLayout';
 import Icon from '@/components/ui/AppIcon';
 
-interface User {
+type Role = 'admin' | 'team_leader' | 'agent';
+
+interface ApiUser {
   id: string;
-  name: string;
   email: string;
-  role: 'admin' | 'manager' | 'department_head' | 'team_member';
-  department: string;
-  status: 'active' | 'inactive';
-  joinDate: string;
+  full_name: string | null;
+  avatar_url: string | null;
+  role: Role;
+  position: string | null;
+  is_active: boolean;
+  created_at: string;
 }
 
+interface ApiDepartment {
+  id: string;
+  name: string;
+  color: string;
+}
+
+interface Invitation {
+  id: string;
+  email: string;
+  full_name: string | null;
+  role: Role;
+  position: string | null;
+  status: 'pending' | 'accepted' | 'revoked' | 'expired';
+  expires_at: string;
+  department: { id: string; name: string } | null;
+  invite_url: string | null;
+}
+
+type InviteForm = {
+  email: string;
+  fullName: string;
+  role: Role;
+  departmentId: string;
+  position: string;
+};
+
+const EMPTY_INVITE: InviteForm = {
+  email: '',
+  fullName: '',
+  role: 'agent',
+  departmentId: '',
+  position: '',
+};
+
+const ROLE_LABEL: Record<Role, string> = {
+  admin: 'Admin',
+  team_leader: 'Team leader',
+  agent: 'Agent',
+};
+
+const ROLE_BADGE: Record<Role, string> = {
+  admin: 'bg-[#ecd862]/20 text-[#a3671d]',
+  team_leader: 'bg-[#c3802d]/20 text-[#a3671d]',
+  agent: 'bg-slate-200 text-slate-700',
+};
+
 export default function UserManagementPage() {
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [filterRole, setFilterRole] = useState<string>('all');
+  const [users, setUsers] = useState<ApiUser[]>([]);
+  const [invitations, setInvitations] = useState<Invitation[]>([]);
+  const [departments, setDepartments] = useState<ApiDepartment[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [inviteOpen, setInviteOpen] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [form, setForm] = useState<InviteForm>(EMPTY_INVITE);
 
-  const [users, setUsers] = useState<User[]>([
-    {
-      id: '1',
-      name: 'Layla Ahmed',
-      email: 'layla@ootlah.com',
-      role: 'admin',
-      department: 'Executive',
-      status: 'active',
-      joinDate: '2024-01-15',
-    },
-    {
-      id: '2',
-      name: 'Omar Hassan',
-      email: 'omar@ootlah.com',
-      role: 'manager',
-      department: 'Marketing',
-      status: 'active',
-      joinDate: '2024-02-01',
-    },
-    {
-      id: '3',
-      name: 'Nour Ibrahim',
-      email: 'nour@ootlah.com',
-      role: 'department_head',
-      department: 'SEO',
-      status: 'active',
-      joinDate: '2024-02-15',
-    },
-    {
-      id: '4',
-      name: 'Sara Mohamed',
-      email: 'sara@ootlah.com',
-      role: 'team_member',
-      department: 'Content',
-      status: 'active',
-      joinDate: '2024-03-01',
-    },
-    {
-      id: '5',
-      name: 'Youssef Ali',
-      email: 'youssef@ootlah.com',
-      role: 'team_member',
-      department: 'Designers',
-      status: 'inactive',
-      joinDate: '2024-03-10',
-    },
-  ]);
+  const load = useCallback(async () => {
+    setLoading(true);
+    try {
+      const [u, i, d] = await Promise.all([
+        fetch('/api/users').then((r) => r.json()),
+        fetch('/api/invitations').then((r) => r.json()),
+        fetch('/api/departments').then((r) => r.json()),
+      ]);
+      setUsers(u.users || []);
+      setInvitations(i.invitations || []);
+      setDepartments(d.departments || []);
+    } catch {
+      toast.error('Could not load users or invitations.');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
-  const filteredUsers = filterRole === 'all'
-    ? users
-    : users.filter(u => u.role === filterRole);
+  useEffect(() => {
+    load();
+  }, [load]);
 
-  const getRoleColor = (role: string) => {
-    switch (role) {
-      case 'admin':
-        return 'bg-red-100 text-red-700';
-      case 'manager':
-        return 'bg-orange-100 text-orange-700';
-      case 'department_head':
-        return 'bg-blue-100 text-blue-700';
-      case 'team_member':
-        return 'bg-green-100 text-green-700';
-      default:
-        return 'bg-slate-100 text-slate-700';
+  const submitInvite = async () => {
+    if (!form.email.trim()) {
+      toast.error('Email is required');
+      return;
+    }
+    setSubmitting(true);
+    try {
+      const res = await fetch('/api/invitations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: form.email.trim(),
+          fullName: form.fullName.trim() || null,
+          role: form.role,
+          departmentId: form.departmentId || null,
+          position: form.position.trim() || null,
+        }),
+      });
+      const payload = await res.json();
+      if (!res.ok) {
+        toast.error(payload.error || 'Could not create invitation');
+        return;
+      }
+      if (payload.invite_url) {
+        try {
+          await navigator.clipboard.writeText(payload.invite_url);
+          toast.success('Invite link created and copied to clipboard.');
+        } catch {
+          toast.success('Invite link created.');
+        }
+      } else {
+        toast.success('Invitation created');
+      }
+      setInviteOpen(false);
+      setForm(EMPTY_INVITE);
+      load();
+    } finally {
+      setSubmitting(false);
     }
   };
 
-  const getStatusColor = (status: string) => {
-    return status === 'active'
-      ? 'bg-green-100 text-green-700'
-      : 'bg-slate-100 text-slate-700';
+  const revoke = async (id: string) => {
+    if (!window.confirm('Revoke this invitation? The link will stop working immediately.')) return;
+    const res = await fetch(`/api/invitations/${id}`, { method: 'DELETE' });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      toast.error(data.error || 'Could not revoke invitation');
+      return;
+    }
+    toast.success('Invitation revoked');
+    load();
+  };
+
+  const copyLink = async (url: string | null) => {
+    if (!url) return;
+    try {
+      await navigator.clipboard.writeText(url);
+      toast.success('Invite link copied');
+    } catch {
+      toast.error('Could not access clipboard');
+    }
   };
 
   return (
     <AppLayout currentPath="/admin/users">
       <div className="space-y-8">
-        {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-800 text-slate-900 mb-2">User Management</h1>
-            <p className="text-slate-600">Manage team members and their roles and permissions</p>
+            <h1 className="text-3xl font-800 text-slate-900 mb-2">User management</h1>
+            <p className="text-slate-600">
+              Invite new team members to specific departments and positions. Only invited emails can sign in.
+            </p>
           </div>
           <button
-            onClick={() => setShowAddModal(true)}
-            className="flex items-center gap-2 px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-lg font-600 transition-colors"
+            onClick={() => setInviteOpen(true)}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-lg font-600 text-[#0f0b05] bg-[#ecd862] hover:bg-[#f2cb50] transition-colors"
           >
-            <Icon name="PlusIcon" size={18} />
-            Add User
+            <Icon name="UserPlusIcon" size={18} />
+            Invite user
           </button>
         </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div className="bg-white rounded-lg border border-slate-200 p-4">
-            <p className="text-xs font-600 text-slate-600 uppercase mb-2">Total Users</p>
-            <p className="text-3xl font-800 text-slate-900">{users.length}</p>
+        {/* Users */}
+        <section className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+          <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
+            <h2 className="text-lg font-700 text-slate-900">Team members</h2>
+            <span className="text-xs text-slate-500">{users.length} total</span>
           </div>
-          <div className="bg-white rounded-lg border border-slate-200 p-4">
-            <p className="text-xs font-600 text-slate-600 uppercase mb-2">Active</p>
-            <p className="text-3xl font-800 text-green-600">{users.filter(u => u.status === 'active').length}</p>
-          </div>
-          <div className="bg-white rounded-lg border border-slate-200 p-4">
-            <p className="text-xs font-600 text-slate-600 uppercase mb-2">Admins</p>
-            <p className="text-3xl font-800 text-red-600">{users.filter(u => u.role === 'admin').length}</p>
-          </div>
-          <div className="bg-white rounded-lg border border-slate-200 p-4">
-            <p className="text-xs font-600 text-slate-600 uppercase mb-2">Departments</p>
-            <p className="text-3xl font-800 text-blue-600">{new Set(users.map(u => u.department)).size}</p>
-          </div>
-        </div>
-
-        {/* Filter */}
-        <div className="w-full md:w-64">
-          <label className="block text-sm font-600 text-slate-900 mb-2">Filter by Role</label>
-          <select
-            value={filterRole}
-            onChange={(e) => setFilterRole(e.target.value)}
-            className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
-          >
-            <option value="all">All Roles</option>
-            <option value="admin">Admin</option>
-            <option value="manager">Manager</option>
-            <option value="department_head">Department Head</option>
-            <option value="team_member">Team Member</option>
-          </select>
-        </div>
-
-        {/* Users Table */}
-        <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-slate-200 bg-slate-50">
-                  <th className="text-left py-4 px-6 font-700 text-slate-900 text-sm">Name</th>
-                  <th className="text-left py-4 px-6 font-700 text-slate-900 text-sm">Email</th>
-                  <th className="text-left py-4 px-6 font-700 text-slate-900 text-sm">Department</th>
-                  <th className="text-left py-4 px-6 font-700 text-slate-900 text-sm">Role</th>
-                  <th className="text-left py-4 px-6 font-700 text-slate-900 text-sm">Status</th>
-                  <th className="text-left py-4 px-6 font-700 text-slate-900 text-sm">Joined</th>
-                  <th className="text-left py-4 px-6 font-700 text-slate-900 text-sm">Actions</th>
+                <tr className="text-left text-xs font-700 uppercase text-slate-500 bg-slate-50">
+                  <th className="py-3 px-6">Name</th>
+                  <th className="py-3 px-6">Email</th>
+                  <th className="py-3 px-6">Role</th>
+                  <th className="py-3 px-6">Position</th>
+                  <th className="py-3 px-6">Status</th>
+                  <th className="py-3 px-6">Joined</th>
                 </tr>
               </thead>
               <tbody>
-                {filteredUsers.map((user) => (
-                  <tr key={user.id} className="border-b border-slate-100 hover:bg-slate-50 transition-colors">
-                    <td className="py-4 px-6">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center text-white font-700 text-sm">
-                          {user.name.charAt(0)}
-                        </div>
-                        <span className="font-600 text-slate-900">{user.name}</span>
-                      </div>
+                {loading && (
+                  <tr>
+                    <td colSpan={6} className="py-6 text-center text-slate-500">
+                      Loading users...
                     </td>
-                    <td className="py-4 px-6 text-slate-600">{user.email}</td>
-                    <td className="py-4 px-6 text-slate-900 font-600">{user.department}</td>
-                    <td className="py-4 px-6">
-                      <span className={`px-3 py-1 rounded-full text-xs font-600 ${getRoleColor(user.role)}`}>
-                        {user.role.replace('_', ' ')}
+                  </tr>
+                )}
+                {!loading &&
+                  users.map((u) => (
+                    <tr key={u.id} className="border-t border-slate-100">
+                      <td className="py-3 px-6 font-600 text-slate-900">
+                        {u.full_name || '(no name)'}
+                      </td>
+                      <td className="py-3 px-6 text-slate-600">{u.email}</td>
+                      <td className="py-3 px-6">
+                        <span
+                          className={`px-2 py-0.5 rounded text-xs font-600 ${ROLE_BADGE[u.role]}`}
+                        >
+                          {ROLE_LABEL[u.role]}
+                        </span>
+                      </td>
+                      <td className="py-3 px-6 text-slate-600">{u.position || '—'}</td>
+                      <td className="py-3 px-6">
+                        <span
+                          className={`px-2 py-0.5 rounded text-xs font-600 ${
+                            u.is_active ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-200 text-slate-600'
+                          }`}
+                        >
+                          {u.is_active ? 'Active' : 'Inactive'}
+                        </span>
+                      </td>
+                      <td className="py-3 px-6 text-slate-600 text-sm">
+                        {new Date(u.created_at).toLocaleDateString()}
+                      </td>
+                    </tr>
+                  ))}
+                {!loading && users.length === 0 && (
+                  <tr>
+                    <td colSpan={6} className="py-6 text-center text-slate-500">
+                      No users yet.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        {/* Pending invitations */}
+        <section className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+          <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
+            <h2 className="text-lg font-700 text-slate-900">Pending invitations</h2>
+            <span className="text-xs text-slate-500">{invitations.length} pending</span>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="text-left text-xs font-700 uppercase text-slate-500 bg-slate-50">
+                  <th className="py-3 px-6">Email</th>
+                  <th className="py-3 px-6">Role</th>
+                  <th className="py-3 px-6">Department</th>
+                  <th className="py-3 px-6">Position</th>
+                  <th className="py-3 px-6">Expires</th>
+                  <th className="py-3 px-6">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {!loading && invitations.length === 0 && (
+                  <tr>
+                    <td colSpan={6} className="py-6 text-center text-slate-500">
+                      No pending invitations.
+                    </td>
+                  </tr>
+                )}
+                {invitations.map((inv) => (
+                  <tr key={inv.id} className="border-t border-slate-100">
+                    <td className="py-3 px-6 font-600 text-slate-900">{inv.email}</td>
+                    <td className="py-3 px-6">
+                      <span
+                        className={`px-2 py-0.5 rounded text-xs font-600 ${ROLE_BADGE[inv.role]}`}
+                      >
+                        {ROLE_LABEL[inv.role]}
                       </span>
                     </td>
-                    <td className="py-4 px-6">
-                      <span className={`px-3 py-1 rounded-full text-xs font-600 ${getStatusColor(user.status)}`}>
-                        {user.status}
-                      </span>
+                    <td className="py-3 px-6 text-slate-600">{inv.department?.name || '—'}</td>
+                    <td className="py-3 px-6 text-slate-600">{inv.position || '—'}</td>
+                    <td className="py-3 px-6 text-slate-600 text-sm">
+                      {new Date(inv.expires_at).toLocaleDateString()}
                     </td>
-                    <td className="py-4 px-6 text-slate-600 text-sm">{new Date(user.joinDate).toLocaleDateString()}</td>
-                    <td className="py-4 px-6">
+                    <td className="py-3 px-6">
                       <div className="flex items-center gap-2">
-                        <button className="p-1.5 hover:bg-slate-100 rounded transition-colors">
-                          <Icon name="PencilIcon" size={16} className="text-slate-600" />
+                        <button
+                          onClick={() => copyLink(inv.invite_url)}
+                          disabled={!inv.invite_url}
+                          className="px-2 py-1 text-xs rounded border border-slate-300 hover:bg-slate-50 disabled:opacity-40"
+                        >
+                          Copy link
                         </button>
-                        <button className="p-1.5 hover:bg-red-50 rounded transition-colors">
-                          <Icon name="TrashIcon" size={16} className="text-red-600" />
+                        <button
+                          onClick={() => revoke(inv.id)}
+                          className="px-2 py-1 text-xs rounded border border-rose-300 text-rose-700 hover:bg-rose-50"
+                        >
+                          Revoke
                         </button>
                       </div>
                     </td>
@@ -198,61 +306,107 @@ export default function UserManagementPage() {
               </tbody>
             </table>
           </div>
-        </div>
+        </section>
+      </div>
 
-        {/* Add User Modal */}
-        {showAddModal && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-xl border border-slate-200 max-w-md w-full p-6">
-              <h2 className="text-2xl font-800 text-slate-900 mb-4">Add New User</h2>
-              <div className="space-y-4">
+      {inviteOpen && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl max-w-md w-full p-6">
+            <h2 className="text-xl font-800 text-slate-900 mb-4">Invite a team member</h2>
+            <p className="text-sm text-slate-500 mb-4">
+              The invite link is single-use and expires after 7 days. Only the invited email can accept it.
+            </p>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-600 text-slate-900 mb-1">Email</label>
+                <input
+                  type="email"
+                  value={form.email}
+                  onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ecd862]/40 focus:border-[#ecd862]"
+                  placeholder="colleague@company.com"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-600 text-slate-900 mb-1">
+                  Full name (optional)
+                </label>
+                <input
+                  type="text"
+                  value={form.fullName}
+                  onChange={(e) => setForm((f) => ({ ...f, fullName: e.target.value }))}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ecd862]/40 focus:border-[#ecd862]"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-sm font-600 text-slate-900 mb-2">Full Name</label>
-                  <input type="text" className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500" />
-                </div>
-                <div>
-                  <label className="block text-sm font-600 text-slate-900 mb-2">Email</label>
-                  <input type="email" className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500" />
-                </div>
-                <div>
-                  <label className="block text-sm font-600 text-slate-900 mb-2">Role</label>
-                  <select className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500">
-                    <option>Team Member</option>
-                    <option>Department Head</option>
-                    <option>Manager</option>
-                    <option>Admin</option>
+                  <label className="block text-sm font-600 text-slate-900 mb-1">Role</label>
+                  <select
+                    value={form.role}
+                    onChange={(e) => setForm((f) => ({ ...f, role: e.target.value as Role }))}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ecd862]/40 focus:border-[#ecd862]"
+                  >
+                    <option value="agent">Agent</option>
+                    <option value="team_leader">Team leader</option>
+                    <option value="admin">Admin</option>
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-600 text-slate-900 mb-2">Department</label>
-                  <select className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500">
-                    <option>Marketing</option>
-                    <option>SEO</option>
-                    <option>Content</option>
-                    <option>BD</option>
-                    <option>Designers</option>
-                    <option>Social Media</option>
+                  <label className="block text-sm font-600 text-slate-900 mb-1">Department</label>
+                  <select
+                    value={form.departmentId}
+                    onChange={(e) => setForm((f) => ({ ...f, departmentId: e.target.value }))}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ecd862]/40 focus:border-[#ecd862]"
+                  >
+                    <option value="">None</option>
+                    {departments.map((d) => (
+                      <option key={d.id} value={d.id}>
+                        {d.name}
+                      </option>
+                    ))}
                   </select>
                 </div>
               </div>
-              <div className="flex gap-3 mt-6">
-                <button
-                  onClick={() => setShowAddModal(false)}
-                  className="flex-1 px-4 py-2 border border-slate-300 rounded-lg font-600 text-slate-700 hover:bg-slate-50 transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={() => setShowAddModal(false)}
-                  className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-600 transition-colors"
-                >
-                  Add User
-                </button>
+              <div>
+                <label className="block text-sm font-600 text-slate-900 mb-1">
+                  Position in department
+                </label>
+                <input
+                  type="text"
+                  value={form.position}
+                  onChange={(e) => setForm((f) => ({ ...f, position: e.target.value }))}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ecd862]/40 focus:border-[#ecd862]"
+                  placeholder="e.g. Senior SEO Analyst"
+                />
+                <p className="text-xs text-slate-500 mt-1">
+                  Saved on the user&apos;s membership in the selected department.
+                </p>
               </div>
             </div>
+
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={() => {
+                  setInviteOpen(false);
+                  setForm(EMPTY_INVITE);
+                }}
+                disabled={submitting}
+                className="flex-1 px-4 py-2 border border-slate-300 rounded-lg font-600 text-slate-700 hover:bg-slate-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={submitInvite}
+                disabled={submitting}
+                className="flex-1 px-4 py-2 rounded-lg font-600 text-[#0f0b05] bg-[#ecd862] hover:bg-[#f2cb50] disabled:opacity-60"
+              >
+                {submitting ? 'Creating...' : 'Create invite'}
+              </button>
+            </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </AppLayout>
   );
 }

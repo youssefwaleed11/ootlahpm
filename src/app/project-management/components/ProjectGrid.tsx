@@ -171,7 +171,7 @@ export default function ProjectGrid({ projects, onEdit, onArchive, onDelete }: P
                   </div>
                   <div className="flex items-center justify-between mt-1">
                     <span className="text-[10px] text-slate-400">
-                      {project.progress === 100 ? '✓ Complete' : `${project.progress}% done`}
+                      {project.progress === 100 ? 'Complete' : `${project.progress}% done`}
                     </span>
                     {overdue && (
                       <span className="text-[10px] text-red-500 font-600 flex items-center gap-0.5">

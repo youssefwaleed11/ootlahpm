@@ -14,15 +14,29 @@ module.exports = {
       },
       colors: {
         brand: {
-          orange: '#F97316',
-          'orange-dark': '#EA580C',
-          'orange-light': '#FB923C',
-          teal: '#0D9488',
-          'teal-dark': '#0F766E',
-          'teal-light': '#14B8A6',
-          navy: '#1E293B',
-          'navy-dark': '#0F172A',
-          'navy-light': '#334155',
+          // Primary gold palette
+          gold: '#ecd862',
+          'gold-dark': '#ddab33',
+          'gold-light': '#f2cb50',
+          amber: '#c3802d',
+          'amber-dark': '#a3671d',
+          // Neutral dark surfaces
+          bg: '#0f0b05',
+          surface: '#1e1508',
+          'surface-2': '#2e200e',
+          ink: '#f0ddb0',
+          'ink-muted': '#c4a46b',
+          'ink-dim': '#7a5e35',
+          // Legacy aliases (kept so old references keep rendering in the gold theme)
+          orange: '#ecd862',
+          'orange-dark': '#ddab33',
+          'orange-light': '#f2cb50',
+          teal: '#c3802d',
+          'teal-dark': '#a3671d',
+          'teal-light': '#ddab33',
+          navy: '#1e1508',
+          'navy-dark': '#0f0b05',
+          'navy-light': '#2e200e',
         },
       },
       boxShadow: {

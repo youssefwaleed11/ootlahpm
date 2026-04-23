@@ -81,7 +81,7 @@ export default function TaskDetailPanel({ task, onClose, onUpdate, onOpenChat, c
         <div className="flex items-center gap-2">
           <span className="text-[11px] font-600 text-slate-400 font-mono">#{task.id.split('-')[1]}</span>
           <span className={`text-[11px] font-600 px-2 py-0.5 rounded-full ${overdue ? 'bg-red-100 text-red-600' : 'bg-slate-100 text-slate-500'}`}>
-            {overdue ? '⚠ Overdue' : 'On track'}
+            {overdue ? 'Overdue' : 'On track'}
           </span>
         </div>
         <div className="flex items-center gap-1">

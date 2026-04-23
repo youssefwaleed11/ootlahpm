@@ -23,7 +23,7 @@ export interface Department {
   updated_at: string;
 }
 
-export type UserRole = 'admin' | 'manager' | 'department_head' | 'team_member';
+export type UserRole = 'admin' | 'team_leader' | 'agent';
 export type ThemePreference = 'light' | 'dark' | 'auto';
 
 export interface User {
@@ -33,9 +33,11 @@ export interface User {
   full_name: string | null;
   avatar_url: string | null;
   role: UserRole;
+  position: string | null;
   is_active: boolean;
   last_login: string | null;
   theme_preference: ThemePreference;
+  invited_by: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -44,8 +46,27 @@ export interface DepartmentMember {
   id: string;
   user_id: string;
   department_id: string;
-  role: 'head' | 'manager' | 'team_member';
+  role: UserRole;
+  position: string | null;
   joined_at: string;
+}
+
+export type InvitationStatus = 'pending' | 'accepted' | 'revoked' | 'expired';
+
+export interface Invitation {
+  id: string;
+  organization_id: string;
+  email: string;
+  full_name: string | null;
+  role: UserRole;
+  department_id: string | null;
+  position: string | null;
+  token: string;
+  status: InvitationStatus;
+  invited_by: string | null;
+  expires_at: string;
+  accepted_at: string | null;
+  created_at: string;
 }
 
 export type ProjectStatus = 'active' | 'completed' | 'on_hold' | 'archived';

@@ -1,32 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-
-// Demo users - in production this would be from Supabase
-const DEMO_USERS: Record<string, { id: string; email: string; password: string; name: string; role: 'admin' | 'manager' | 'team_member'; department: string }> = {
-  'layla@ootlah.com': {
-    id: 'user-admin-001',
-    email: 'layla@ootlah.com',
-    password: 'Admin@2026',
-    name: 'Layla Admin',
-    role: 'admin',
-    department: 'management',
-  },
-  'omar@ootlah.com': {
-    id: 'user-manager-001',
-    email: 'omar@ootlah.com',
-    password: 'Leader@2026',
-    name: 'Omar Manager',
-    role: 'manager',
-    department: 'marketing',
-  },
-  'nour@ootlah.com': {
-    id: 'user-member-001',
-    email: 'nour@ootlah.com',
-    password: 'Agent@2026',
-    name: 'Nour Team Member',
-    role: 'team_member',
-    department: 'seo',
-  },
-};
+import { createClient } from '@/lib/supabase/server';
 
 export async function POST(request: NextRequest) {
   try {
@@ -34,43 +7,47 @@ export async function POST(request: NextRequest) {
 
     if (!email || !password) {
       return NextResponse.json(
-        { error: 'Email and password required' },
-        { status: 400 }
+        { error: 'Email and password are required' },
+        { status: 400 },
       );
     }
 
-    const user = DEMO_USERS[email];
+    const supabase = await createClient();
 
-    if (!user || user.password !== password) {
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: String(email).toLowerCase().trim(),
+      password: String(password),
+    });
+
+    if (error || !data.user) {
       return NextResponse.json(
         { error: 'Invalid email or password' },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
-    // Create mock session
-    const mockSession = {
-      access_token: `token-${user.id}-${Date.now()}`,
-      refresh_token: `refresh-${user.id}-${Date.now()}`,
-      expires_in: 3600,
-      token_type: 'Bearer',
-    };
+    // Only users who have an active profile (i.e. accepted an invite) may sign
+    // in. Everyone else is rejected and the Supabase session is cleared.
+    const { data: profile } = await supabase
+      .from('users')
+      .select('id, email, full_name, avatar_url, role, organization_id, position, is_active')
+      .eq('id', data.user.id)
+      .maybeSingle();
+
+    if (!profile || profile.is_active === false) {
+      await supabase.auth.signOut();
+      return NextResponse.json(
+        { error: 'This account is not active. Ask an admin for an invitation.' },
+        { status: 403 },
+      );
+    }
 
     return NextResponse.json({
-      user: {
-        id: user.id,
-        email: user.email,
-        name: user.name,
-        role: user.role,
-        department: user.department,
-      },
-      session: mockSession,
+      user: profile,
+      session: data.session,
     });
-  } catch (error) {
-    console.error('[v0] Login error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+  } catch (err) {
+    console.error('Login error:', err);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
